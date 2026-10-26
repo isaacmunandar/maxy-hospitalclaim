@@ -1,0 +1,1894 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#F2F5FA">
+<title>MAXY AI Claim Intelligence</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400..800&amp;family=JetBrains+Mono:wght@500;600&amp;display=swap">
+<style>
+:root{
+  color-scheme:light;
+  --font:'Plus Jakarta Sans','Segoe UI',Arial,sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,Consolas,monospace;
+  --bg:#F2F5FA; --surface:#FFFFFF; --surface-2:#F6F8FC; --line:#DCE3EF; --line-2:#C9D4E6;
+  --ink:#0B1F4D; --muted:#66748F; --soft:#8290AB; --navy:#0B1F4D; --orange:#F5921E;
+  --accent:#1A7FE0; --accent-hover:#1465BF; --accent-bg:#E6F0FC;
+  --ok:#1C7A4C; --ok-bg:#E2F4EA; --warn:#9A5A00; --warn-bg:#FFF0D6;
+  --crit:#B3342A; --crit-bg:#FCE6E3; --info:#1465BF; --info-bg:#E6F0FC;
+  --purple:#6C4FC4; --purple-bg:#EFEAFA;
+  --s-layak:#1A7FE0; --s-pending:#D9760A; --s-dispute:#7B55D6; --s-tolak:#C9433A;
+  --scrim:rgba(7,18,40,.45);
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:var(--font);font-size:14px;line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+.wrap{max-width:1280px;margin:0 auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+.num{font-variant-numeric:tabular-nums}
+.mono{font-family:var(--mono);font-size:12px;letter-spacing:0}
+.muted{color:var(--muted)}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+/* header */
+.topbar{background:var(--surface);border-bottom:1px solid var(--line)}
+.topbar .wrap{padding-block:15px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 24px}
+.brand{display:flex;align-items:center;gap:11px;min-width:0}
+.mtile{width:36px;height:36px;border-radius:10px;background:var(--orange);color:#fff;display:grid;place-items:center;font-weight:800;font-size:20px;flex:none}
+.brand b{display:block;color:var(--navy);font-size:15px;letter-spacing:.05em;line-height:1.2}
+.brand small{display:block;color:var(--muted);font-size:12px;font-weight:600;letter-spacing:.02em}
+.meta{display:flex;flex-wrap:wrap;align-items:center;gap:6px 16px;color:var(--muted);font-size:12.5px}
+.meta strong{color:var(--ink);font-weight:700}
+.dummy{font-size:11px;font-weight:700;color:var(--muted);background:var(--surface-2);border:1px solid var(--line);padding:2px 8px;border-radius:999px}
+
+/* tabs */
+.tabs{position:sticky;top:0;z-index:20;background:var(--surface);border-bottom:1px solid var(--line)}
+.tabs .wrap{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
+.tabs .wrap::-webkit-scrollbar{display:none}
+.tab{background:none;border:0;padding:13px 13px 11px;font-weight:700;font-size:13.5px;color:var(--muted);border-bottom:2px solid transparent;white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
+.tab:hover{color:var(--ink)}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.count{display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--accent-bg);color:var(--accent);font-size:10.5px;font-weight:800;line-height:1}
+
+main .wrap{padding-block:28px 44px;display:flex;flex-direction:column;gap:22px}
+.page-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px 24px}
+.page-head .greeting{font-size:32px;font-weight:800;color:var(--ink);margin:0 0 8px;letter-spacing:-.03em;line-height:1.15}
+.page-head h1,.queue-head h1{font-size:27px;line-height:1.2;letter-spacing:-.025em;margin:0;font-weight:800;text-wrap:balance}
+.page-head p{margin:6px 0 0;color:var(--muted);max-width:68ch;font-size:13.5px}
+.eyebrow{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:5px}
+.head-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+
+/* surfaces */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;min-width:0}
+.panel h2{font-size:14.5px;margin:0;line-height:1.3;font-weight:750}
+.panel-head{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:8px 16px;margin-bottom:16px}
+.panel-head .sub{color:var(--muted);font-size:12.5px;margin:3px 0 0}
+.grid-2{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:18px}
+.grid-2b{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px}
+@media (max-width:980px){.grid-2,.grid-2b{grid-template-columns:minmax(0,1fr)}}
+
+/* kpi */
+.kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:17px 18px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.kpi .lbl{color:var(--muted);font-size:12.5px;font-weight:650}
+.kpi .val{font-size:29px;font-weight:800;line-height:1.15;letter-spacing:-.025em}
+.kpi .dl{font-size:12px;font-weight:650;color:var(--muted);margin-top:2px}
+.kpi .dl.good{color:var(--ok)}
+.kpi .dl.warn{color:var(--warn)}
+.kpi.hl{background:var(--accent-bg);border-color:transparent}
+.kpi.hl .val{color:var(--accent)}
+.kpi.flash .val{animation:flash 1.1s ease}
+@keyframes flash{0%{opacity:.25;transform:translateY(2px)}100%{opacity:1;transform:none}}
+@media (max-width:1100px){.kpis{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:820px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:430px){.kpis{grid-template-columns:minmax(0,1fr)}.kpi .val{font-size:26px}}
+
+/* buttons */
+.btn{border:1px solid var(--line-2);background:var(--surface);border-radius:10px;padding:8px 13px;font-weight:700;font-size:13px;display:inline-flex;align-items:center;justify-content:center;gap:7px;white-space:nowrap;transition:border-color .15s,background .15s}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:hover{background:var(--accent-hover);border-color:var(--accent-hover)}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--accent)}
+.btn.ghost:hover{background:var(--accent-bg)}
+.btn:disabled{opacity:.5;cursor:default}
+.btn.small{padding:6px 10px;font-size:12px}
+.seg{display:inline-flex;border:1px solid var(--line-2);border-radius:9px;padding:3px;gap:2px;background:var(--surface-2);margin-bottom:10px}
+.seg button{border:0;background:none;padding:5px 10px;border-radius:6px;font-weight:700;font-size:12px;color:var(--muted);white-space:nowrap}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(11,31,77,.08)}
+
+/* pills */
+.pill{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:999px;font-weight:700;font-size:11.5px;white-space:nowrap;line-height:1.65}
+.pill.ok{background:var(--ok-bg);color:var(--ok)}
+.pill.warn{background:var(--warn-bg);color:var(--warn)}
+.pill.crit{background:var(--crit-bg);color:var(--crit)}
+.pill.info{background:var(--info-bg);color:var(--info)}
+.pill.mute{background:var(--surface-2);color:var(--muted);border:1px solid var(--line)}
+.pill.purple{background:var(--purple-bg);color:var(--purple)}
+.tag{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:2px 7px;border-radius:5px;background:var(--accent-bg);color:var(--accent);white-space:nowrap}
+
+/* summary */
+.trend-value{font-size:24px;font-weight:800;letter-spacing:-.02em}
+.trend-delta{font-size:12px;font-weight:700;color:var(--ok);margin-left:8px}
+.trend-wrap{position:relative}
+.trend-wrap svg{display:block;width:100%;height:auto;overflow:visible}
+svg .grid{stroke:var(--line);stroke-width:1}
+svg .ax{fill:var(--muted);font-size:11px;font-family:var(--font);font-weight:600}
+svg .ln{stroke:var(--accent);stroke-width:2.5;fill:none;stroke-linejoin:round;stroke-linecap:round}
+svg .ar{fill:var(--accent);opacity:.08}
+svg .pt{fill:var(--accent);stroke:var(--surface);stroke-width:2}
+svg .live{stroke:var(--orange);stroke-width:1.5;stroke-dasharray:4 5}
+svg .live-t{fill:var(--warn);font-size:10.5px;font-weight:800;font-family:var(--font)}
+svg .end-t{fill:var(--ink);font-size:12px;font-weight:800;font-family:var(--font)}
+svg .cross{stroke:var(--line-2);stroke-width:1}
+.tt{position:absolute;pointer-events:none;background:var(--ink);color:var(--surface);font-size:11.5px;font-weight:700;padding:5px 9px;border-radius:7px;white-space:nowrap;transform:translate(-50%,-110%);box-shadow:0 4px 16px rgba(0,0,0,.12)}
+.note{font-size:12px;color:var(--muted);margin:10px 0 0;line-height:1.5}
+
+.task-list{display:flex;flex-direction:column}
+.task{all:unset;cursor:pointer;display:grid;grid-template-columns:36px minmax(0,1fr) 16px;align-items:center;gap:11px;padding:12px 0;border-bottom:1px solid var(--line)}
+.task:first-child{padding-top:0}
+.task:last-child{border-bottom:0;padding-bottom:0}
+.task:hover .task-txt b{color:var(--accent)}
+.task:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:8px}
+.task-count{width:36px;height:32px;border-radius:8px;background:var(--surface-2);display:grid;place-items:center;font-weight:800;font-size:14px;color:var(--accent)}
+.task-txt{min-width:0}
+.task-txt b{display:block;font-size:13.5px;line-height:1.35;font-weight:700;transition:color .15s}
+.task-txt span{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+.task-arrow{color:var(--soft);font-size:16px;text-align:right}
+
+.activity-head .recovered{font-size:12px;color:var(--muted);white-space:nowrap}
+.activity-head .recovered b{color:var(--accent);font-weight:800}
+.feed{display:grid;grid-template-columns:minmax(0,1fr)}
+.feed-row{all:unset;cursor:pointer;display:grid;grid-template-columns:78px minmax(0,1fr) 14px;gap:10px;padding:12px 0;border-top:1px solid var(--line);align-items:start}
+.feed-row:hover .feed-title{color:var(--accent)}
+.feed-row:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:8px}
+.agent-tag{font-size:11px;font-weight:800;color:var(--accent);letter-spacing:.02em;padding-top:1px}
+.feed-title{font-size:13px;font-weight:700;line-height:1.4;transition:color .15s}
+.feed-meta{display:block;color:var(--muted);font-size:11.5px;font-weight:600;margin-top:2px}
+.feed-arrow{color:var(--soft);font-size:14px}
+
+.status-panel .stack{height:18px;margin-bottom:16px}
+.status-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px 18px}
+.status-item{display:flex;gap:8px;align-items:flex-start;min-width:0}
+.status-item .sw{margin-top:4px}
+.status-item .st-label{display:block;font-size:12.5px;font-weight:700;line-height:1.35}
+.status-item .st-val{display:block;font-size:11.5px;color:var(--muted);margin-top:1px;white-space:nowrap}
+@media (max-width:820px){.status-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:430px){.status-grid{grid-template-columns:minmax(0,1fr)}}
+
+.vcheck{display:grid;grid-template-columns:16px minmax(0,1fr);align-items:center;gap:7px;padding:8px 9px;border:1px solid var(--line);border-radius:8px;background:var(--surface-2);font-size:11.5px;font-weight:650;min-width:0}
+.vcheck .mk{width:16px;height:16px;border-radius:50%;display:grid;place-items:center;font-size:9px;font-weight:900;line-height:1}
+.vcheck.ok .mk{background:var(--ok-bg);color:var(--ok)}
+.vcheck.bad .mk{background:var(--crit-bg);color:var(--crit)}
+.vcheck>span:last-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vcheck-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:7px}
+@media (max-width:560px){.vcheck-grid{grid-template-columns:minmax(0,1fr)}}
+
+/* queue */
+.queue-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px 24px}
+.queue-sub{color:var(--muted);font-size:13px;margin:5px 0 0}
+.prog{height:3px;background:var(--surface-2);border-radius:999px;overflow:hidden;margin-top:-8px}
+.prog span{display:block;height:100%;width:0;background:var(--accent);transition:width .12s linear}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.toolbar .grow{flex:1 1 260px;min-width:0}
+.field{border:1px solid var(--line-2);background:var(--surface);border-radius:10px;padding:8px 11px;font-size:13px;width:100%;min-height:38px}
+.field::placeholder{color:var(--soft)}
+select.field{width:auto;padding-right:28px;min-width:118px}
+.result-count{color:var(--muted);font-size:12px;font-weight:600;margin-left:auto;white-space:nowrap}
+.table-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.tbl{width:100%;border-collapse:collapse;table-layout:fixed;font-size:13.5px}
+.tbl th{text-align:left;font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:800;padding:11px 18px;border-bottom:1px solid var(--line);background:var(--surface-2);white-space:nowrap}
+.tbl th:nth-child(1){width:44%}
+.tbl th:nth-child(2){width:16%}
+.tbl th:nth-child(3){width:22%}
+.tbl th:nth-child(4){width:18%;text-align:right}
+.tbl td{padding:13px 18px;border-bottom:1px solid var(--line);vertical-align:middle}
+.tbl tbody tr:last-child td{border-bottom:0}
+.tbl tbody tr{transition:background .12s}
+#qBody tr{cursor:pointer}
+#qBody tr:hover{background:var(--surface-2)}
+.tbl tbody tr:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.sep{display:block;font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:0;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.who{display:block;font-size:14px;font-weight:750;line-height:1.35}
+.row-sub{display:block;font-size:11.5px;color:var(--muted);font-weight:600;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.risk{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:750;white-space:nowrap}
+.risk i{width:7px;height:7px;border-radius:50%;background:currentColor;display:inline-block;flex:none}
+.risk.high{color:var(--crit)}
+.risk.mid{color:var(--warn)}
+.risk.low{color:var(--ok)}
+.risk.none{color:var(--muted);font-weight:600}
+.risk-sub{display:block;color:var(--muted);font-size:11px;margin-top:3px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.c-value{text-align:right;white-space:nowrap;font-weight:750}
+.value-cell{text-align:right;white-space:nowrap;font-weight:750}
+.chev{display:inline-block;color:var(--soft);font-size:17px;margin-left:8px;transform:translateY(-1px)}
+.empty{padding:36px 18px!important;text-align:center;color:var(--muted)}
+.load-row{padding:13px 18px;border-top:1px solid var(--line);display:flex;justify-content:center}
+.spin{width:12px;height:12px;border-radius:50%;border:2px solid var(--line-2);border-top-color:var(--accent);animation:sp .8s linear infinite;display:inline-block;vertical-align:-2px}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* pending */
+.kpis.k3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.kanban{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.col{background:var(--surface-2);border:1px solid var(--line);border-radius:14px;padding:10px;min-width:0;display:flex;flex-direction:column;gap:8px}
+.col-h{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:2px 4px 4px;font-weight:800;font-size:12px}
+.col-h .count{background:var(--surface);border:1px solid var(--line);color:var(--muted);font-size:11px;padding:0 7px;border-radius:999px;font-weight:700}
+.pcard{background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:11px;display:flex;flex-direction:column;gap:7px;cursor:pointer;transition:border-color .15s}
+.pcard:hover{border-color:var(--accent)}
+.pcard:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.pcard.moved{animation:pop .35s ease}
+@keyframes pop{from{opacity:.45;transform:scale(.985)}to{opacity:1;transform:none}}
+.ptop{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.ptop .mono{color:var(--muted);font-size:10.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pwho{min-width:0}
+.pwho b{display:block;font-size:12.5px;line-height:1.35}
+.pwho span{display:block;font-size:11.5px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pmeta{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:11.5px;color:var(--muted)}
+.pmeta b{color:var(--ink);font-size:12.5px}
+.pact{margin-top:1px}
+.pact .btn{width:100%;padding:6px 8px;font-size:11.5px}
+.col-empty{color:var(--muted);font-size:11.5px;padding:8px 4px;margin:0}
+@media (max-width:1100px){.kanban{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:620px){.kanban{grid-template-columns:minmax(0,1fr)}.kpis.k3{grid-template-columns:minmax(0,1fr)}}
+
+/* analytics */
+.bar-list{display:flex;flex-direction:column;gap:12px}
+.bar-row{display:flex;flex-direction:column;gap:5px}
+.bar-row .top{display:flex;justify-content:space-between;gap:12px;font-size:12.5px}
+.bar-row .top b{font-weight:700}
+.bar-row .top span{color:var(--muted);font-weight:700;white-space:nowrap}
+.bar-track{height:6px;background:var(--surface-2);border-radius:999px;overflow:hidden}
+.bar-track i{display:block;height:100%;background:var(--accent);border-radius:999px}
+.stack{display:flex;gap:2px;height:26px;border-radius:6px;overflow:hidden;background:var(--surface-2);margin-bottom:14px}
+.stack div{height:100%}
+.stack div:first-child{border-radius:5px 0 0 5px}
+.stack div:last-child{border-radius:0 5px 5px 0}
+.legend-list{display:flex;flex-direction:column;gap:9px}
+.legend-row{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:12.5px}
+.legend-row .k{display:flex;align-items:center;gap:8px;color:var(--muted)}
+.sw{width:9px;height:9px;border-radius:3px;flex:none}
+.legend-row .v{font-weight:750;white-space:nowrap}
+.rate{font-weight:750;white-space:nowrap}
+.rate.hot{color:var(--warn)}
+.margin-list{display:flex;flex-direction:column}
+.margin-row{padding:10px 0;border-bottom:1px solid var(--line)}
+.margin-row:first-child{padding-top:0}
+.margin-row:last-child{border-bottom:0;padding-bottom:0}
+.margin-top{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 12px;align-items:baseline;font-size:12.5px}
+.margin-top>span{min-width:0}
+.margin-top b{font-weight:700}
+.margin-top em{font-style:normal;font-weight:750;white-space:nowrap}
+.margin-top em.pos{color:var(--ok)}
+.margin-top em.neg{color:var(--crit)}
+.margin-bars{display:flex;flex-direction:column;gap:4px;margin-top:6px}
+.mbar{display:grid;grid-template-columns:34px 1fr 34px;align-items:center;gap:7px;font-size:10.5px;color:var(--soft);font-weight:700}
+.mbar .track{height:5px;background:var(--surface-2);border-radius:999px;overflow:hidden}
+.mbar .track i{display:block;height:100%;border-radius:999px}
+.mbar .amt{text-align:right}
+
+
+/* drawer */
+.scrim{position:fixed;inset:0;background:var(--scrim);z-index:40;opacity:0;pointer-events:none;transition:opacity .2s}
+.scrim.on{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(680px,100%);background:var(--surface);z-index:50;transform:translateX(100%);transition:transform .24s ease;display:flex;flex-direction:column;box-shadow:-12px 0 40px rgba(0,0,0,.08);padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);padding-right:env(safe-area-inset-right,0px)}
+.drawer.on{transform:none}
+body.drawer-open{overflow:hidden}
+.dh{border-bottom:1px solid var(--line);padding:18px 20px;display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex:none}
+.dh h3{margin:0;font-size:17px;line-height:1.35;font-weight:800}
+.dh .dh-sub{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:6px}
+.db{overflow-y:auto;overscroll-behavior:contain;padding:20px;display:flex;flex-direction:column;gap:18px;flex:1}
+.db-claim{background:var(--bg)}
+.df{border-top:1px solid var(--line);padding:13px 20px;display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;align-items:center;background:var(--surface);flex:none}
+.summary-card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px}
+.stage-card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:14px}
+.x{border:1px solid var(--line);background:var(--surface);border-radius:9px;width:34px;height:34px;font-size:19px;line-height:1;flex:none;color:var(--muted)}
+.x:hover{color:var(--ink);border-color:var(--line-2)}
+.sec{display:flex;flex-direction:column;gap:10px}
+.sec-h{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.sec-h h4{margin:0;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.meta-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 18px}
+.meta-item span{display:block;color:var(--muted);font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px}
+.meta-item b,.meta-item div{font-size:13px;font-weight:650;line-height:1.45}
+.callout{background:var(--surface-2);border:1px solid var(--line);border-radius:11px;padding:13px;display:flex;flex-direction:column;gap:9px;font-size:13px;color:var(--muted)}
+.score-box{display:flex;align-items:center;gap:16px;background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:14px}
+.score-box .big{font-size:36px;font-weight:800;line-height:1;letter-spacing:-.03em}
+.score-box .lbl{font-size:12px;color:var(--muted);margin-top:3px}
+.checks{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:9px;font-size:12.5px}
+.checks li{display:flex;gap:9px;align-items:flex-start;line-height:1.45}
+.ck{flex:none;width:18px;height:18px;border-radius:50%;display:grid;place-items:center;font-size:10px;font-weight:900;margin-top:1px}
+.ck.y{background:var(--ok-bg);color:var(--ok)}
+.ck.n{background:var(--crit-bg);color:var(--crit)}
+.doc-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);font-size:12.5px}
+.doc-row:last-child{border-bottom:0;padding-bottom:0}
+.doc-row .doc-txt{min-width:0}
+.doc-row .doc-txt span{display:block;color:var(--muted);font-size:11px;margin-top:2px}
+.code-box{background:var(--surface-2);border:1px dashed var(--line-2);border-radius:11px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.code-line{display:flex;justify-content:space-between;gap:14px;font-size:13px;line-height:1.5;flex-wrap:wrap;align-items:baseline}
+.code-line>span:first-child{color:var(--ink);font-weight:650}
+.code-line.suggest{color:var(--accent);font-weight:750}
+.code-why{font-size:13px;line-height:1.55;color:var(--muted);margin:0}
+.code-why b{color:var(--ink);font-weight:750}
+.delta{color:var(--ok);font-weight:800}
+.drawer-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:2px}
+.letter{white-space:pre-wrap;font-size:12.5px;line-height:1.65;background:var(--surface-2);border:1px solid var(--line);border-radius:11px;padding:14px;max-height:280px;overflow:auto}
+.steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.steps li{font-size:10.5px;font-weight:700;color:var(--muted);border-top:3px solid var(--line);padding-top:6px;line-height:1.35}
+.steps li.on{border-top-color:var(--accent);color:var(--ink)}
+.evidence{margin:0;padding-left:17px;font-size:12.5px;color:var(--muted);line-height:1.6}
+@media (max-width:560px){.meta-grid,.steps{grid-template-columns:minmax(0,1fr)}.dh{padding:15px 16px}.db{padding:16px}.df{padding:11px 16px}}
+
+/* toast */
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,16px);background:var(--ink);color:var(--surface);padding:10px 15px;border-radius:10px;font-weight:700;font-size:12.5px;z-index:80;opacity:0;transition:opacity .2s,transform .2s;max-width:calc(100% - 32px);text-align:center}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+footer .wrap{padding-block:0 34px;color:var(--soft);font-size:11.5px;line-height:1.6}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* mobile table cards */
+@media (max-width:760px){
+  .table-card{background:none;border:0;border-radius:0;overflow:visible}
+  .tbl{display:block;min-width:0}
+  .tbl thead{display:none}
+  .tbl tbody{display:block}
+  .tbl tbody tr{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 12px;background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:13px 14px;margin-bottom:9px}
+  .tbl tbody tr:last-child{margin-bottom:0}
+  .tbl td{display:block;border:0;padding:0}
+  .tbl td.c-claim{grid-column:1;grid-row:1;min-width:0}
+  .tbl td.c-status{grid-column:2;grid-row:1;text-align:right;align-self:start}
+  .tbl td.c-risk{grid-column:1;grid-row:2}
+  .tbl td.c-value{grid-column:2;grid-row:2;text-align:right;align-self:end}
+  .tbl td.c-value .chev{display:none}
+  .tbl tbody tr:last-child td{border-bottom:0}
+  .sep{font-size:10px}
+  .load-row{border-top:0;padding:10px 0 0}
+  .result-count{margin-left:0;width:100%}
+}
+
+@media (max-width:520px){
+  .wrap{padding-left:max(15px,env(safe-area-inset-left,0px));padding-right:max(15px,env(safe-area-inset-right,0px))}
+  main .wrap{padding-block:22px 34px;gap:18px}
+  .page-head h1,.queue-head h1{font-size:23px}
+  .page-head .greeting{font-size:26px}
+  .panel{padding:16px;border-radius:12px}
+  .meta{font-size:11.5px}
+  .dummy{display:none}
+  .head-actions{width:100%}
+  .head-actions .btn{width:100%}
+  .feed-row{grid-template-columns:68px minmax(0,1fr) 12px}
+}
+
+/* Claim pathways and private insurance worklist */
+.payer-overview{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.payer-card{min-width:0;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:16px;box-shadow:0 5px 22px rgba(11,31,77,.035);transition:transform .15s,border-color .15s,box-shadow .15s}
+.payer-card:hover{transform:translateY(-2px);border-color:var(--accent);box-shadow:0 10px 26px rgba(11,31,77,.08)}
+.payer-card.active{border-top:3px solid var(--accent)}
+.payer-card:not(.active){border-top:3px solid var(--orange)}
+.payer-card-top{display:grid;grid-template-columns:38px 1fr auto;align-items:center;gap:11px}
+.payer-card-top strong{display:block;font-size:15px;line-height:1.3}
+.payer-card-top small{display:block;color:var(--muted);font-size:11.5px;margin-top:3px}
+.payer-card-top>span:last-child{color:var(--soft);font-size:19px}
+.payer-icon{width:38px;height:38px;display:grid;place-items:center;background:var(--accent-bg);color:var(--accent);border-radius:11px;font-weight:800}
+.insurance-icon{background:var(--warn-bg);color:var(--warn)}
+.payer-card-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding-top:14px;border-top:1px solid var(--line)}
+.payer-card-metrics span+span{border-left:1px solid var(--line);padding-left:12px}
+.payer-card-metrics small{display:block;color:var(--muted);font-size:11px;margin-bottom:4px}
+.payer-card-metrics b{font-size:17px;white-space:nowrap}
+.payer-card-foot{display:flex;justify-content:space-between;color:var(--accent);font-size:12px;font-weight:800}
+.section-label{display:flex;justify-content:space-between;gap:8px;color:var(--muted);font-size:11px;font-weight:700;margin-bottom:-12px}
+.section-label span:first-child{color:var(--ink);font-size:13px}
+.journey{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;background:var(--surface);border:1px solid var(--line);border-radius:15px;overflow:hidden}
+.journey-step{position:relative;padding:12px 14px;display:grid;grid-template-columns:24px 1fr;column-gap:9px;align-content:start}
+.journey-step+.journey-step{border-left:1px solid var(--line)}
+.journey-step>span{grid-row:span 2;width:24px;height:24px;display:grid;place-items:center;border-radius:7px;background:var(--accent-bg);color:var(--accent);font-size:10px;font-weight:800}
+.journey-step b{font-size:12px;line-height:1.35}
+.journey-step small{font-size:11px;color:var(--muted);line-height:1.45;margin-top:2px}
+.journey-note{margin:10px 0 0;color:var(--muted);font-size:11.5px}
+.journey-step .ai-hint{display:block;grid-column:2;margin-top:6px;padding:5px 7px;border-radius:6px;background:var(--accent-bg);color:var(--accent);font-weight:700}
+.flow-step .ai-hint{margin-top:6px;padding:5px 7px;border-radius:6px;background:var(--accent-bg);color:var(--accent);font-weight:700}
+.ai-badge{display:inline-block;padding:2px 6px;margin-right:6px;border-radius:5px;background:var(--accent-bg);color:var(--accent);font-size:10px;font-weight:800;letter-spacing:.02em}
+.insurance-kpis{grid-template-columns:repeat(4,minmax(0,1fr))}
+.insurance-work{padding-bottom:16px}
+.insurance-toolbar{margin-bottom:15px}
+.insurance-table .tbl th:nth-child(1){width:25%}
+.insurance-table .tbl th:nth-child(2){width:15%}
+.insurance-table .tbl th:nth-child(3){width:16%}
+.insurance-table .tbl th:nth-child(4){width:30%;text-align:left}
+.insurance-table .tbl th:nth-child(5){width:14%;text-align:right}
+.insurance-table .tbl tr[data-iopen]{cursor:pointer}
+.insurance-table .tbl tr[data-iopen]:hover{background:var(--surface-2)}
+.insurance-table .tbl td{padding:13px 12px}
+.insurance-table .tbl th{padding:11px 12px}
+.i-issue{font-size:12px;line-height:1.35;font-weight:700}
+.i-pic{display:block;color:var(--muted);font-size:11px;margin-top:4px}
+.i-amount{text-align:right;white-space:nowrap;font-weight:800}
+.i-reconc{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.i-reconc>div{background:var(--surface-2);border:1px solid var(--line);border-radius:9px;padding:10px}
+.i-reconc span{display:block;color:var(--muted);font-size:10px}
+.i-reconc b{display:block;font-size:13px;margin-top:3px}
+.i-next{background:var(--accent-bg);border:1px solid #cee2fa;border-radius:10px;padding:13px}
+.i-next b{display:block;font-size:12px}
+.i-next p{margin:3px 0 0;font-size:12px}
+@media(max-width:980px){.journey{grid-template-columns:repeat(2,minmax(0,1fr))}.journey-step:nth-child(3){border-left:0;border-top:1px solid var(--line)}.journey-step:nth-child(4){border-top:1px solid var(--line)}}
+@media(max-width:820px){.payer-overview{grid-template-columns:1fr}.insurance-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.insurance-table .tbl thead{display:none}.insurance-table .tbl tbody{display:block}.insurance-table .tbl tbody tr{display:grid;grid-template-columns:1fr auto;gap:7px 12px;border:1px solid var(--line);border-radius:12px;margin-bottom:9px;padding:13px}.insurance-table .tbl td{display:block;border:0;padding:0}.insurance-table .tbl td:nth-child(1){grid-column:1}.insurance-table .tbl td:nth-child(2){grid-column:2;text-align:right}.insurance-table .tbl td:nth-child(3){grid-column:1}.insurance-table .tbl td:nth-child(4){grid-column:1}.insurance-table .tbl td:nth-child(5){grid-column:2;grid-row:3;text-align:right}}
+@media(max-width:540px){.journey{grid-template-columns:1fr}.journey-step+.journey-step{border-left:0;border-top:1px solid var(--line)}.insurance-kpis{grid-template-columns:1fr 1fr}.payer-card-metrics b{font-size:14px}.i-reconc{grid-template-columns:repeat(2,minmax(0,1fr))}.section-label{flex-direction:column}.dummy{display:inline-flex}}
+@media(prefers-reduced-motion:reduce){.payer-card{transition:none}.payer-card:hover{transform:none}}
+
+
+/* Navigation and workspaces */
+.app-shell{display:grid;grid-template-columns:252px minmax(0,1fr);min-height:100vh}
+.app-content{min-width:0}
+.app-sidebar{position:sticky;top:0;height:100vh;overflow-y:auto;background:#0B1F4D;color:#DBE7FA;display:flex;flex-direction:column;z-index:35;padding:20px 13px}
+.sidebar-top{display:flex;align-items:center;justify-content:space-between;padding:0 8px 17px}
+.app-sidebar .brand b{color:#fff;font-size:15px}
+.app-sidebar .brand small{color:#AFC3E1}
+.app-sidebar .mtile{box-shadow:0 5px 15px rgba(0,0,0,.13)}
+.side-close{display:none;border:0;background:none;color:#fff;font-size:25px}
+.sidebar-context{margin:0 7px 18px;padding:13px 14px;border:1px solid rgba(219,231,250,.17);border-radius:11px;background:rgba(255,255,255,.055)}
+.sidebar-context span,.sidebar-context small{display:block;color:#AEC1DF;font-size:10.5px}
+.sidebar-context strong{display:block;color:#fff;font-size:12px;margin:4px 0 2px}
+.side-nav{display:flex;flex-direction:column;gap:20px;flex:1}
+.nav-group{display:flex;flex-direction:column;gap:4px}
+.nav-group-label{padding:4px 13px 7px;color:#95AED2;font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:800}
+.app-sidebar .tab{width:100%;border:0;border-radius:9px;padding:10px 12px;text-align:left;display:flex;align-items:center;gap:10px;font-size:12.5px;color:#C5D4EA;font-weight:650;line-height:1.3;white-space:normal}
+.app-sidebar .tab:hover{color:#fff;background:rgba(255,255,255,.08)}
+.app-sidebar .tab[aria-selected="true"]{color:#fff;background:#1C427A;box-shadow:inset 3px 0 var(--orange)}
+.app-sidebar .tab .count{margin-left:auto;background:rgba(255,255,255,.12);color:#fff}
+.nav-icon{width:19px;text-align:center;font-size:16px;color:#9EB9DF;font-weight:700;flex:none}
+.app-sidebar .tab[aria-selected="true"] .nav-icon{color:#FFB75F}
+.sidebar-bottom{border-top:1px solid rgba(255,255,255,.15);padding:17px 12px 4px;font-size:11.5px;font-weight:700;color:#E7F0FF}
+.sidebar-bottom small{display:block;color:#9FB5D3;font-size:10.5px;font-weight:500;margin-top:3px;line-height:1.45}
+.status-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#67C69B;margin-right:7px}
+.app-content .topbar{position:relative}
+.app-content .topbar .wrap{max-width:none}
+.app-content .topbar .brand{gap:8px}
+.menu-toggle{display:none;border:1px solid var(--line);background:var(--surface);border-radius:8px;width:34px;height:34px;font-size:16px}
+.sidebar-backdrop{display:none}
+@media(max-width:900px){
+ .app-shell{display:block}
+ .app-sidebar{position:fixed;left:0;top:0;bottom:0;width:min(290px,85vw);height:100dvh;transform:translateX(-100%);transition:transform .2s}
+ body.nav-open .app-sidebar{transform:none}
+ .side-close,.menu-toggle{display:block}
+ .sidebar-backdrop:not([hidden]){display:block;position:fixed;inset:0;z-index:34;background:rgba(7,18,40,.48)}
+ body.nav-open{overflow:hidden}
+}
+@media(prefers-reduced-motion:reduce){.app-sidebar{transition:none}}
+/* Inpatient and guarantee worklists */
+.flow-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.flow-step{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:11px 13px;min-width:0}
+.flow-step span{display:block;color:var(--accent);font-size:10px;font-weight:800;letter-spacing:.08em}
+.flow-step b{display:block;font-size:12px;margin:4px 0 2px}
+.flow-step small{display:block;color:var(--muted);font-size:11px;line-height:1.35}
+.kmkb-kpis{grid-template-columns:repeat(4,minmax(0,1fr))}
+.kmkb-table .tbl th:nth-child(1){width:29%}
+.kmkb-table .tbl th:nth-child(2){width:17%}
+.kmkb-table .tbl th:nth-child(3){width:17%}
+.kmkb-table .tbl th:nth-child(4){width:21%;text-align:left}
+.kmkb-table .tbl th:nth-child(5){width:16%;text-align:right}
+.kmkb-table .tbl tr[data-kopen]{cursor:pointer}
+.kmkb-table .tbl tr[data-kopen]:hover{background:var(--surface-2)}
+.mini-progress{height:7px;border-radius:20px;background:var(--surface-2);overflow:hidden;margin-top:5px}
+.mini-progress i{display:block;height:100%;border-radius:20px;background:var(--accent)}
+.mini-progress i.hot{background:var(--crit)}
+.finding-list{display:grid;gap:9px}
+.finding{border:1px solid var(--line);border-radius:10px;padding:11px;background:var(--surface)}
+.finding b{display:block;font-size:12px}
+.finding small{display:block;color:var(--muted);font-size:11px;margin-top:3px}
+.source-row{display:grid;grid-template-columns:1fr auto;gap:10px;border-bottom:1px solid var(--line);padding:9px 0;font-size:12px}
+.source-row:last-child{border-bottom:0}
+.source-row b{font-size:11.5px}
+.source-row small{display:block;color:var(--muted);font-size:10.5px;margin-top:2px}
+.guarantee-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.guarantee-card{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:15px;text-align:left}
+.guarantee-card:hover{border-color:var(--accent)}
+.guarantee-card strong{display:block;font-size:13px}
+.guarantee-card small{display:block;color:var(--muted);font-size:11px;margin-top:4px}
+.guarantee-card p{font-size:12px;line-height:1.4;margin:10px 0}
+.guarantee-card .pill{margin-top:5px}
+.audit-list{margin:0;padding-left:20px;color:var(--muted);font-size:11.5px}
+.audit-list li+li{margin-top:6px}
+@media(max-width:1100px){.flow-strip{grid-template-columns:repeat(2,minmax(0,1fr))}.kmkb-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.guarantee-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:680px){.flow-strip,.guarantee-grid{grid-template-columns:1fr}.kmkb-kpis{grid-template-columns:1fr 1fr}.kmkb-table .tbl thead{display:none}.kmkb-table .tbl tbody{display:block}.kmkb-table .tbl tbody tr{display:grid;grid-template-columns:1fr auto;gap:7px;border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:8px}.kmkb-table .tbl td{display:block;border:0;padding:0}.kmkb-table .tbl td:nth-child(1){grid-column:1}.kmkb-table .tbl td:nth-child(2){grid-column:2}.kmkb-table .tbl td:nth-child(3){grid-column:1}.kmkb-table .tbl td:nth-child(4){grid-column:1}.kmkb-table .tbl td:nth-child(5){grid-column:2;grid-row:3;text-align:right}}
+
+@media(min-width:901px){.app-content .topbar .brand{display:none}.app-content .topbar .wrap{justify-content:flex-end}}
+@media(max-width:680px){
+ #tab-jaminan .flow-strip{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #tab-jaminan .kpis.k3{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #tab-jaminan .kpis.k3 .kpi:last-child{grid-column:1/-1}
+ #tab-asuransi .journey{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #tab-asuransi .journey-step:nth-child(2){border-left:1px solid var(--line);border-top:0}
+ #tab-asuransi .journey-step:nth-child(3){border-left:0;border-top:1px solid var(--line)}
+ #tab-asuransi .journey-step:nth-child(4){border-left:1px solid var(--line);border-top:1px solid var(--line)}
+}
+@media(max-width:540px){
+ .insurance-table .tbl tbody tr{grid-template-columns:minmax(0,1fr) auto}
+ .insurance-table .tbl td{min-width:0}
+ .insurance-table .tbl td:nth-child(1){grid-column:1/-1;grid-row:1}
+ .insurance-table .tbl td:nth-child(2){grid-column:1/-1;grid-row:2;text-align:left}
+ .insurance-table .tbl td:nth-child(3){grid-column:1;grid-row:3}
+ .insurance-table .tbl td:nth-child(4){grid-column:1/-1;grid-row:4}
+ .insurance-table .tbl td:nth-child(5){grid-column:2;grid-row:3}
+}
+.detail-disclosure summary{cursor:pointer;font-size:12px;font-weight:750}
+.detail-disclosure summary::after{content:"+";float:right;color:var(--accent);font-size:16px;line-height:1}
+.detail-disclosure[open] summary::after{content:"−"}
+.detail-disclosure .audit-list{margin-top:12px}
+.claim-path-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:-14px}
+.insurance-paths{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.insurance-paths button{display:flex;align-items:center;gap:12px;min-height:66px;padding:11px 15px;text-align:left;background:var(--surface);border:1px solid var(--line-2);border-radius:12px;transition:background .15s,border-color .15s;min-width:0}
+.insurance-paths button:hover{border-color:var(--accent)}
+.insurance-paths button[aria-selected="true"]{background:var(--navy);border-color:var(--navy);color:#fff;box-shadow:inset 4px 0 var(--orange)}
+.path-index{display:grid;place-items:center;width:31px;height:31px;flex:none;border-radius:8px;background:var(--accent-bg);color:var(--accent);font:700 11px var(--mono)}
+.insurance-paths button[aria-selected="true"] .path-index{background:rgba(255,255,255,.14);color:#fff}
+.path-copy{display:flex;flex-direction:column;min-width:0}
+.path-copy strong{font-size:14px;line-height:1.2}
+.path-copy small{font-size:11.5px;color:var(--muted);margin-top:3px;line-height:1.25}
+.insurance-paths button[aria-selected="true"] .path-copy small{color:#C8D8EF}
+.path-arrow{margin-left:auto;font-size:19px;color:var(--accent);line-height:1}
+.insurance-paths button[aria-selected="true"] .path-arrow{color:#FFB75F}
+#insuranceContent{display:flex;flex-direction:column;gap:22px;min-width:0}
+.insurance-recon{margin:-10px 0 0;padding:10px 13px;border-left:3px solid var(--accent);border-radius:8px;background:var(--accent-bg);color:#315578;font-size:12px;line-height:1.5}
+.reimb-scope{margin:0 0 12px;padding:11px 14px;border:1px solid #CEE0F1;border-radius:10px;background:#F4F8FD;color:#314B6B;font-size:12px;line-height:1.5}
+@media(max-width:540px){
+ .insurance-paths{gap:8px}
+ .insurance-paths button{padding:10px;min-height:70px}
+ .path-index,.path-arrow{display:none}
+ .path-copy strong{font-size:12.5px}
+ .path-copy small{font-size:10px}
+}
+</style>
+</head>
+<body>
+
+
+<div class="app-shell">
+  <aside class="app-sidebar" id="appSidebar" aria-label="Navigasi dashboard">
+    <div class="sidebar-top">
+      <div class="brand"><div class="mtile" aria-hidden="true">M</div><div><b>MAXY AI</b><small>Claim Intelligence</small></div></div>
+      <button class="side-close" id="sidebarClose" aria-label="Tutup menu">×</button>
+    </div>
+    <nav class="side-nav" aria-label="Menu utama">
+      <div class="nav-group"><div class="nav-group-label">Ikhtisar</div>
+        <button class="tab" data-tab="ringkasan" aria-selected="true"><span class="nav-icon">◫</span>Ringkasan</button>
+      </div>
+      <div class="nav-group"><div class="nav-group-label">BPJS Kesehatan</div>
+        <button class="tab" data-tab="kmkb" aria-selected="false"><span class="nav-icon">✚</span>Selama perawatan <span class="count" id="cntKmkb">0</span></button>
+        <button class="tab" data-tab="antrian" aria-selected="false"><span class="nav-icon">✓</span>Pra-pengajuan <span class="count" id="cntQueue">0</span></button>
+        <button class="tab" data-tab="pending" aria-selected="false"><span class="nav-icon">↺</span>Pending &amp; dispute <span class="count" id="cntPending">0</span></button>
+        <button class="tab" data-tab="analitik" aria-selected="false"><span class="nav-icon">▥</span>Analitik BPJS</button>
+      </div>
+      <div class="nav-group"><div class="nav-group-label">Asuransi swasta</div>
+        <button class="tab" data-tab="jaminan" aria-selected="false"><span class="nav-icon">◇</span>Manfaat &amp; penjaminan</button>
+        <button class="tab" data-tab="asuransi" aria-selected="false"><span class="nav-icon">▤</span>Klaim &amp; pembayaran <span class="count" id="cntInsurance">0</span></button>
+      </div>
+    </nav>
+    <div class="sidebar-bottom"><span class="status-dot"></span>Prototipe interaktif <small>Keputusan tetap pada petugas RS dan penjamin.</small></div>
+  </aside>
+  <div class="sidebar-backdrop" id="sidebarBackdrop" hidden></div>
+  <div class="app-content">
+<header class="topbar">
+  <div class="wrap">
+    <div class="brand">
+      <button class="menu-toggle" id="menuToggle" aria-label="Buka menu" aria-controls="appSidebar" aria-expanded="false">☰</button>
+      <div><b>MAXY AI</b><small>Ruang kerja klaim</small></div>
+    </div>
+    <div class="meta">
+      <span><strong>RS Medika Nusantara</strong> · Tipe B · Jakarta Timur</span>
+      <span>Periode <strong>Okt 2026</strong></span>
+      <span class="dummy">Data dummy</span>
+    </div>
+  </div>
+</header>
+
+<main>
+<section class="wrap" id="tab-ringkasan">
+  <div class="page-head">
+    <div>
+      
+      <div class="eyebrow">Pusat kendali klaim</div>
+      <h1>Ringkasan klaim</h1>
+      <p>Pantau klaim yang perlu tindakan dan pembayaran yang belum masuk.</p>
+    </div>
+    <div class="head-actions"><button class="btn primary" data-goto="antrian">Buka antrian <span aria-hidden="true">→</span></button></div>
+  </div>
+
+  <div class="payer-overview" aria-label="Ringkasan menurut penjamin">
+    <button class="payer-card active" data-goto="kmkb">
+      <span class="payer-card-top"><span class="payer-icon">B</span><span><strong>BPJS Kesehatan</strong><small>JKN · alur SEP, koding, E-Klaim</small></span><span aria-hidden="true">↗</span></span>
+      <span class="payer-card-metrics"><span><small>Diajukan</small><b>Rp 12,4 M</b></span><span><small>Layak</small><b>Rp 10,2 M</b></span><span><small>Dibayar</small><b>Rp 8,7 M</b></span></span>
+      
+    </button>
+    <button class="payer-card" data-goto="asuransi">
+      <span class="payer-card-top"><span class="payer-icon insurance-icon">A</span><span><strong>Asuransi swasta</strong><small>Cashless RS · tagihan ke penjamin</small></span><span aria-hidden="true">↗</span></span>
+      <span class="payer-card-metrics"><span><small>Tagihan final · 5 kasus</small><b>Rp 69,6 jt</b></span><span><small>Disetujui penjamin</small><b>Rp 52 jt</b></span><span><small>Dibayar ke RS</small><b>Rp 15,2 jt</b></span></span>
+      
+    </button>
+  </div>
+  <div class="section-label"><span>BPJS Kesehatan</span><span>Angka periode Oktober 2026 · data dummy</span></div>
+  <p class="insurance-recon">Ringkasan ini mencakup 1.860 klaim yang diajukan pada Oktober 2026. Daftar kerja di halaman lain hanya contoh terpilih: 64 klaim sebelum pengajuan, 10 pasien aktif, dan 10 kasus pending/dispute. Angkanya tidak untuk dijumlahkan menjadi total periode.</p>
+  <div class="kpis" id="kpis"></div>
+
+  <div class="grid-2">
+    <div class="panel">
+      <div class="panel-head">
+        <div><h2 id="trendTitle">Tingkat pending</h2><p class="sub">Nov 2025 – Okt 2026</p></div>
+        <div><span class="trend-value num" id="trendValue">8,2%</span><span class="trend-delta" id="trendDelta">↓ 0,8 poin</span></div>
+      </div>
+      <div class="seg" role="group" aria-label="Pilih metrik">
+        <button data-metric="pending" aria-pressed="true">Pending %</button>
+        <button data-metric="days" aria-pressed="false">Hari ke pengajuan</button>
+      </div>
+      <div class="trend-wrap" id="trend"></div>
+      <p class="note" id="trendNote">Garis putus-putus = awal simulasi. Tren ini bukan bukti dampak produk.</p>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <div><h2>Perlu ditindaklanjuti</h2><p class="sub">Tugas yang menunggu keputusan</p></div>
+      </div>
+      <div class="task-list" id="priorities"></div>
+    </div>
+  </div>
+
+  <div class="panel status-panel">
+    <div class="panel-head">
+      <div><h2>Nilai klaim per status</h2><p class="sub">Total Rp 12,4 M · 1.860 berkas</p></div>
+    </div>
+    <div class="stack" id="summaryStack" role="img" aria-label="Komposisi nilai klaim per status"></div>
+    <div class="status-grid" id="summaryStatus"></div>
+    <p class="note">Dari Rp 12,4 M yang diajukan: Rp 10,2 M dinilai layak, Rp 1 M pending, Rp 700 jt dispute, dan Rp 500 jt tidak layak. Dari nilai yang layak, Rp 8,7 M sudah dibayar dan Rp 1,5 M masih menunggu pembayaran. Status dan pembayaran adalah dua hal berbeda.</p>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head activity-head">
+      <div><h2>Aktivitas AI agent hari ini</h2><p class="sub">Klik untuk membuka klaim</p></div>
+      <span class="recovered">Potensi kode periode · simulasi <b id="recoveredNote"></b></span>
+    </div>
+    <div class="feed" id="feed"></div>
+  </div>
+</section>
+
+
+<section class="wrap" id="tab-kmkb" hidden>
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">BPJS · sejak pasien dirawat</div>
+      <h1>Kendali mutu dan biaya</h1>
+      <p>Tinjau temuan sebelum pasien pulang.</p>
+    </div>
+    <span class="pill info">10 pasien aktif · data dummy</span>
+  </div>
+  <div class="flow-strip" aria-label="Alur bantuan AI selama perawatan">
+    <div class="flow-step"><span>01 · DATA</span><b>Sinkronkan rekam medis</b><small>CPPT, diagnosis, tindakan, penunjang, dan billing dari SIMRS.</small></div>
+    <div class="flow-step"><span>02 · TINJAU</span><b>Temukan kekurangan</b><small>AI menandai bukti yang belum lengkap dan kode yang perlu diperiksa.</small></div>
+    <div class="flow-step"><span>03 · BANDINGKAN</span><b>Pantau biaya</b><small>Bandingkan biaya berjalan dengan estimasi tarif secara ilustratif.</small></div>
+    <div class="flow-step"><span>04 · PUTUSKAN</span><b>Tindak lanjut manusia</b><small>DPJP, koder, dan KMKB mencatat keputusan dan sumbernya.</small></div>
+  </div>
+  <div class="kpis kmkb-kpis" id="kKpis"></div>
+  <div class="panel">
+    <div class="panel-head"><div><h2>Pasien rawat aktif</h2><p class="sub">Buka kasus untuk melihat bukti dan PIC.</p></div><span class="pill mute" id="kCount">0 kasus</span></div>
+    <div class="toolbar" style="margin-bottom:14px">
+      <div class="grow"><input class="field" id="kSearch" type="search" placeholder="Cari pasien, dokter, atau diagnosis" aria-label="Cari pasien rawat aktif"></div>
+      <select class="field" id="kRisk" aria-label="Filter risiko KMKB"><option value="">Semua risiko</option><option value="tinggi">Prioritas tinggi</option><option value="sedang">Perlu telaah</option><option value="rendah">Terpantau</option></select>
+      <select class="field" id="kUnit" aria-label="Filter unit KMKB"><option value="">Semua unit</option></select>
+    </div>
+    <div class="table-card kmkb-table">
+      <table class="tbl"><thead><tr><th>Pasien / diagnosis</th><th>Unit / DPJP</th><th>Lama rawat</th><th>Temuan AI</th><th>Billing / estimasi</th></tr></thead><tbody id="kBody"></tbody></table>
+    </div>
+    <p class="note">Estimasi tarif dan risiko pada prototipe adalah simulasi. Validasi kode dan keputusan klinis tetap dilakukan petugas berwenang.</p>
+  </div>
+</section>
+
+<section class="wrap" id="tab-antrian" hidden>
+  <div class="queue-head">
+    <div>
+      <div class="eyebrow">Sebelum pengajuan</div>
+      <h1>Antrian klaim</h1>
+      <p class="queue-sub" id="queueSub">Memuat klaim…</p>
+    </div>
+    <div class="head-actions"><button class="btn primary" id="runVerify">Jalankan AI Verifier</button></div>
+  </div>
+  <div class="prog" id="prog" hidden><span></span></div>
+
+  <div class="toolbar">
+    <div class="grow"><input class="field" id="q" type="search" placeholder="Cari SEP, pasien, atau diagnosis" aria-label="Cari klaim"></div>
+    <select class="field" id="fStatus" aria-label="Filter status">
+      <option value="">Semua status</option>
+      <option value="baru">Belum diperiksa</option>
+      <option value="review">Perlu perbaikan</option>
+      <option value="siap">Siap diajukan</option>
+      <option value="disetujui">Disetujui koder</option>
+    </select>
+    <select class="field" id="fUnit" aria-label="Filter unit"><option value="">Semua unit</option></select>
+    <select class="field" id="fSort" aria-label="Urutkan">
+      <option value="risk">Risiko tertinggi</option>
+      <option value="pulang">Pulang terbaru</option>
+      <option value="tarif">Nilai terbesar</option>
+    </select>
+    <span class="result-count" id="queueCount"></span>
+  </div>
+
+  <div class="table-card">
+    <table class="tbl">
+      <thead><tr><th>Klaim / Pasien</th><th>Status</th><th>Risiko</th><th>Estimasi tarif*</th></tr></thead>
+      <tbody id="qBody"></tbody>
+    </table>
+    <div class="load-row"><button class="btn ghost small" id="loadMore" hidden>Muat 12 klaim lagi</button></div>
+  </div>
+</section>
+
+<section class="wrap" id="tab-pending" hidden>
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">Setelah pengajuan</div>
+      <h1>Pending &amp; dispute</h1>
+      <p id="pendingSub">Tindak lanjuti klaim yang dikembalikan BPJS.</p>
+    </div>
+  </div>
+
+  <div class="kpis k3" id="pKpis"></div>
+  <div class="kanban" id="kanban"></div>
+</section>
+
+
+<section class="wrap" id="tab-jaminan" hidden>
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">Asuransi swasta · sebelum tagihan akhir</div>
+      <h1>Manfaat dan penjaminan</h1>
+      <p>Periksa kasus sebelum pasien pulang.</p>
+    </div>
+    <button class="btn" data-goto="asuransi">Semua klaim <span aria-hidden="true">→</span></button>
+  </div>
+  <div class="flow-strip" aria-label="Tahap penjaminan dan bantuan AI">
+    <div class="flow-step"><span>01</span><b>Cek polis</b><small class="ai-hint">AI: status &amp; limit</small></div>
+    <div class="flow-step"><span>02</span><b>Jaminan awal</b><small class="ai-hint">AI: lampiran &amp; respons</small></div>
+    <div class="flow-step"><span>03</span><b>Selama dirawat</b><small class="ai-hint">AI: perubahan layanan</small></div>
+    <div class="flow-step"><span>04</span><b>Jaminan akhir</b><small class="ai-hint">AI: tagihan vs manfaat</small></div>
+  </div>
+  <div class="kpis k3" id="gKpis"></div>
+  <div class="panel">
+    <div class="panel-head"><h2>Kasus penjaminan</h2><span class="pill mute" id="gCount">0 kasus</span></div>
+    <div class="guarantee-grid" id="gCards"></div>
+  </div>
+</section>
+
+
+<section class="wrap" id="tab-asuransi" hidden>
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">Asuransi swasta</div>
+      <h1>Klaim dan pembayaran</h1>
+      <p id="insPageDesc">Cashless: RS menagih asuransi dan mencocokkan pembayaran yang masuk.</p>
+    </div>
+    <span class="pill info">Data dummy</span>
+  </div>
+  <div class="claim-path-label">Pilih jalur klaim</div>
+  <div class="insurance-paths" id="insurancePaths" role="tablist" aria-label="Jalur klaim asuransi">
+    <button id="insCashlessTab" type="button" role="tab" data-i-mode="Cashless" aria-selected="true" aria-controls="insuranceContent" tabindex="0">
+      <span class="path-index" aria-hidden="true">01</span>
+      <span class="path-copy"><strong>Cashless</strong><small>RS menagih asuransi</small></span>
+      <span class="path-arrow" aria-hidden="true">→</span>
+    </button>
+    <button id="insReimbTab" type="button" role="tab" data-i-mode="Reimbursement" aria-selected="false" aria-controls="insuranceContent" tabindex="-1">
+      <span class="path-index" aria-hidden="true">02</span>
+      <span class="path-copy"><strong>Reimbursement</strong><small>RS bantu berkas pasien</small></span>
+      <span class="path-arrow" aria-hidden="true">→</span>
+    </button>
+  </div>
+  <div id="insuranceContent" role="tabpanel" aria-labelledby="insCashlessTab">
+  <div id="cashlessIntro">
+    <div class="journey" aria-label="Tahap klaim cashless dan bantuan AI">
+      <div class="journey-step"><span>01</span><b>Cek polis</b><small class="ai-hint">AI: manfaat &amp; limit</small></div>
+      <div class="journey-step"><span>02</span><b>Jaminan awal</b><small class="ai-hint">AI: berkas &amp; respons</small></div>
+      <div class="journey-step"><span>03</span><b>Tagihan akhir</b><small class="ai-hint">AI: biaya vs keputusan</small></div>
+      <div class="journey-step"><span>04</span><b>Pembayaran</b><small class="ai-hint">AI: selisih &amp; piutang</small></div>
+    </div>
+  </div>
+  <div id="reimbIntro" hidden>
+    <p class="reimb-scope">Keputusan dan pembayaran asuransi kepada pasien berada di luar dashboard RS.</p>
+    <div class="journey" aria-label="Tahap bantuan berkas reimbursement oleh RS">
+      <div class="journey-step"><span>01</span><b>Pasien bayar RS</b><small class="ai-hint">Pembayaran RS lunas</small></div>
+      <div class="journey-step"><span>02</span><b>RS cek berkas</b><small class="ai-hint">AI: kuitansi &amp; lampiran</small></div>
+      <div class="journey-step"><span>03</span><b>RS serahkan berkas</b><small class="ai-hint">Untuk pasien</small></div>
+      <div class="journey-step"><span>04</span><b>Pasien ajukan</b><small class="ai-hint">Di luar sistem RS</small></div>
+    </div>
+  </div>
+  <div class="kpis insurance-kpis" id="iKpis"></div>
+  <p class="insurance-recon" id="cashlessRecon">Simulasi tanpa penjamin kedua. Dari 5 tagihan final Rp 69,6 jt: Rp 52 jt disetujui asuransi, Rp 7,8 jt menjadi bagian pasien, dan Rp 9,8 jt belum mendapat keputusan. Bagian pasien belum berarti sudah dibayar.</p>
+  <div class="panel insurance-work">
+    <div class="panel-head">
+      <h2 id="iWorkTitle">Kasus cashless</h2>
+      <span class="pill mute" id="iCount">0 kasus</span>
+    </div>
+    <div class="toolbar insurance-toolbar">
+      <div class="grow"><input class="field" id="iSearch" type="search" placeholder="Cari klaim, pasien, penjamin" aria-label="Cari klaim asuransi"></div>
+      <select class="field" id="iStage" aria-label="Filter tahap asuransi">
+        <option value="">Semua tahap</option>
+        <option value="manfaat">Cek polis</option>
+        <option value="awal">Jaminan awal</option>
+        <option value="akhir">Jaminan akhir</option>
+        <option value="bayar">Pembayaran</option>
+        <option value="selesai">Selesai</option>
+      </select>
+      <select class="field" id="iPriority" aria-label="Filter prioritas">
+        <option value="">Semua prioritas</option>
+        <option value="tinggi">Perlu tindakan</option>
+        <option value="rutin">Dalam proses</option>
+      </select>
+    </div>
+    <div class="table-card insurance-table">
+      <table class="tbl"><thead><tr><th id="iCaseTh">Klaim / pasien</th><th id="iPayerTh">Asuransi</th><th>Tahap</th><th>Temuan AI · PIC</th><th id="iAmountTh">Biaya / tagihan</th></tr></thead><tbody id="iBody"></tbody></table>
+    </div>
+  </div>
+  </div>
+</section>
+
+<section class="wrap" id="tab-analitik" hidden>
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">Analitik</div>
+      <h1>Pola pending dan margin</h1>
+      <p>Temukan penyebab pending dan kasus berisiko.</p>
+    </div>
+  </div>
+
+  <div class="grid-2b">
+    <div class="panel">
+      <div class="panel-head"><div><h2>Alasan klaim belum selesai</h2><p class="sub">214 berkas pending dan dispute · periode Oktober</p></div></div>
+      <div class="bar-list" id="reasonsBody"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><div><h2>Nilai klaim per status</h2><p class="sub">Total Rp 12,4 M · 1.860 berkas</p></div></div>
+      <div class="stack" id="stack" role="img" aria-label="Komposisi nilai klaim per status"></div>
+      <div class="legend-list" id="stackLegend"></div>
+    </div>
+  </div>
+
+  <div class="grid-2b">
+    <div class="panel">
+      <div class="panel-head"><div><h2>Pending per DPJP</h2><p class="sub">Okt 2026</p></div></div>
+      <div class="table-card" style="border:0">
+        <table class="tbl" style="table-layout:auto;min-width:0">
+          <thead><tr><th style="width:auto">DPJP</th><th style="width:80px;text-align:right">Klaim</th><th style="width:100px;text-align:right">Pending</th></tr></thead>
+          <tbody id="dpjpBody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><div><h2>Estimasi tarif paket vs biaya pelayanan</h2><p class="sub">Rata-rata per kasus · juta rupiah</p></div></div>
+      <div class="margin-list" id="margin"></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head"><div><h2>Watchlist batas pengajuan awal</h2><p class="sub">5 contoh dari 37 klaim yang belum diajukan · tenggat 6 bulan setelah pelayanan selesai</p></div></div>
+    <div class="table-card" style="border:0">
+      <table class="tbl" style="table-layout:auto;min-width:0">
+        <thead><tr><th style="width:38%">Klaim / Pasien</th><th style="width:16%">Nilai</th><th style="width:28%">Hambatan</th><th style="width:18%;text-align:right">Sisa waktu</th></tr></thead>
+        <tbody id="expBody"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer><div class="wrap">Seluruh kasus dan angka adalah simulasi. Nama perusahaan asuransi hanya contoh, tanpa kerja sama yang dinyatakan. Tarif paket dan manfaat polis hanya simulasi.</div></footer>
+  </div>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="dTitle" aria-hidden="true"></aside>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+'use strict';
+var $=function(s,r){return (r||document).querySelector(s)};
+var $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
+var RS='RS Medika Nusantara';
+var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* deterministic dummy data */
+var seed=20261015;
+function rnd(){seed=(seed*1664525+1013904223)>>>0;return seed/4294967296}
+function ri(a,b){return a+Math.floor(rnd()*(b-a+1))}
+function pick(a){return a[Math.floor(rnd()*a.length)]}
+function id1(n){return n.toLocaleString('id-ID',{minimumFractionDigits:1,maximumFractionDigits:1})}
+function jtNum(n){return (Math.round(n*10)/10).toLocaleString('id-ID',{maximumFractionDigits:1})}
+function rp(jt){if(jt>=1000)return 'Rp '+jtNum(jt/1000)+' M';if(jt<1)return 'Rp '+Math.round(jt*1000)+' rb';return 'Rp '+jtNum(jt)+' jt'}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+
+var DPJP={
+ 'Penyakit Dalam':['dr. Andi Pratama, Sp.PD','dr. Dewi Anggraini, Sp.PD'],
+ 'Paru':['dr. Fajar Nugroho, Sp.P'],'Jantung':['dr. Hendra Gunawan, Sp.JP'],'Saraf':['dr. Maya Lestari, Sp.N'],
+ 'Obstetri':['dr. Rina Kusuma, Sp.OG'],'Bedah':['dr. Budi Santoso, Sp.B'],'Anak':['dr. Sari Wulandari, Sp.A'],
+ 'Perinatologi':['dr. Sari Wulandari, Sp.A'],'Rawat Jalan':['dr. Andi Pratama, Sp.PD','dr. Hendra Gunawan, Sp.JP']
+};
+var DX=[
+ {c:'A91',n:'Demam berdarah dengue',u:'Penyakit Dalam',t:[4.2,6.1,8.9],s:{c:'D69.6',n:'Trombositopenia',why:'Trombosit 38.000/µL tercatat pada hasil lab hari ke-2, belum dikode sebagai diagnosis sekunder.'},ev:['Hasil lab trombosit dan hematokrit serial (hari 1 sampai 4)','Lembar pemantauan tanda vital','Resume medis bertanda tangan DPJP'],note:'Mohon lampirkan hasil trombosit dan hematokrit serial untuk mendukung diagnosis DBD.'},
+ {c:'J18.9',n:'Pneumonia',u:'Paru',t:[5.1,7.4,11.2],s:{c:'J96.0',n:'Gagal napas akut',why:'SpO₂ 86% dan oksigen NRM 10 lpm tercatat di catatan perawat IGD.'},ev:['Foto toraks PA dan ekspertise radiolog','Hasil kultur sputum','Catatan pemberian antibiotik IV'],note:'Lampirkan foto toraks dan ekspertise radiolog sebagai bukti pneumonia.'},
+ {c:'I50.9',n:'Gagal jantung',u:'Jantung',t:[6.3,9.0,13.8],s:{c:'E87.1',n:'Hiponatremia',why:'Natrium 126 mmol/L dan koreksi NaCl 3% tercatat, belum dikode.'},ev:['Catatan perkembangan harian sebagai justifikasi lama rawat','Hasil ekokardiografi','Catatan pemberian diuretik IV'],note:'Lama rawat 9 hari melebihi rata-rata kelompok. Mohon lampirkan justifikasi klinis.'},
+ {c:'I63.9',n:'Infark serebral',u:'Saraf',t:[7.8,11.6,17.4],s:{c:'J69.0',n:'Pneumonia aspirasi',why:'Foto toraks hari ke-3 menunjukkan infiltrat baru dan antibiotik IV diberikan.'},ev:['Hasil CT scan kepala dan ekspertise','Catatan pemeriksaan neurologis','Resume medis bertanda tangan DPJP'],note:'Lampirkan hasil CT scan kepala untuk konfirmasi diagnosis infark serebral.'},
+ {c:'E11.9',n:'Diabetes melitus tipe 2',u:'Penyakit Dalam',t:[3.4,5.2,7.6],s:{c:'E11.5',n:'DM tipe 2 dengan komplikasi sirkulasi perifer',why:'Ulkus kaki diabetik dan debridemen tercatat di laporan tindakan; kode utama belum spesifik.'},ev:['Hasil HbA1c dan gula darah serial','Laporan tindakan debridemen'],note:'Diagnosis sekunder tidak didukung hasil penunjang. Mohon klarifikasi.'},
+ {c:'N18.5',n:'Penyakit ginjal kronik stadium 5',u:'Penyakit Dalam',t:[5.9,8.7,12.1],s:{c:'D63.8',n:'Anemia pada penyakit kronik',why:'Hb 7,2 g/dL dan transfusi PRC 2 kolf tercatat, belum dikode.'},ev:['Jadwal dan laporan tindakan hemodialisis','Hasil ureum, kreatinin dan eGFR'],note:'Mohon lampirkan bukti tindakan hemodialisis selama rawat inap.'},
+ {c:'O82',n:'Persalinan sesar',u:'Obstetri',t:[6.8,8.4,10.9],s:{c:'O14.1',n:'Preeklamsia berat',why:'TD 170/110 mmHg dan pemberian MgSO₄ tercatat di partograf, belum menjadi diagnosis sekunder.'},ev:['Laporan operasi dengan indikasi sesar','Partograf dan hasil CTG','Resume medis bertanda tangan DPJP'],note:'Indikasi sesar belum tercantum jelas di laporan operasi. Mohon konfirmasi.'},
+ {c:'K35.8',n:'Apendisitis akut',u:'Bedah',t:[6.1,8.2,11.5],s:{c:'K65.0',n:'Peritonitis akut',why:'Laporan operasi mencatat perforasi dengan cairan purulen di rongga abdomen.'},ev:['Laporan operasi','Hasil patologi anatomi','Hasil USG abdomen'],note:'Laporan operasi dan hasil patologi anatomi belum dilampirkan.'},
+ {c:'A09',n:'Diare dan gastroenteritis',u:'Anak',t:[2.3,3.4,4.9],s:{c:'E86',n:'Dehidrasi',why:'Dehidrasi berat dan rehidrasi IV tercatat di resume, belum dikode.'},ev:['Catatan balans cairan','Hasil elektrolit'],note:'Mohon lampirkan catatan balans cairan untuk mendukung derajat dehidrasi.'},
+ {c:'P07.3',n:'Bayi prematur',u:'Perinatologi',t:[8.5,13.2,21.0],s:null,ev:['Catatan perawatan inkubator','Hasil lab bayi'],note:'Mohon lampirkan catatan perawatan perinatologi.'},
+ {c:'J44.1',n:'PPOK eksaserbasi akut',u:'Paru',t:[4.8,6.9,9.7],s:null,ev:['Hasil spirometri atau AGD','Catatan nebulisasi'],note:'Mohon lampirkan hasil analisa gas darah.'},
+ {c:'I10',n:'Hipertensi esensial',u:'Rawat Jalan',t:[0.21,0.21,0.21],s:null,rj:true,ev:[],note:''}
+];
+var ISSUES={
+ lab:{cat:'Penunjang medis',t:'Hasil lab pendukung diagnosis belum terlampir',w:28},
+ rad:{cat:'Penunjang medis',t:'Hasil radiologi belum terlampir',w:24},
+ resume:{cat:'Dokumentasi',t:'Resume medis belum ditandatangani DPJP',w:22},
+ oplap:{cat:'Dokumentasi',t:'Laporan operasi tidak ada di berkas',w:30},
+ bill:{cat:'Billing',t:'Rincian tagihan obat tidak sesuai resep',w:18},
+ los:{cat:'Koding',t:'Lama rawat di atas rata-rata kelompok tanpa justifikasi',w:16},
+ sep:{cat:'Administrasi',t:'Tanggal SEP tidak sesuai tanggal masuk',w:20},
+ kode:{cat:'Koding',t:'Diagnosis utama kurang didukung anamnesis',w:26}
+};
+var INITIALS=['A.S.','B.W.','C.R.','D.P.','E.K.','F.H.','G.L.','H.N.','I.M.','J.T.','K.A.','L.S.','M.R.','N.F.','O.D.','P.Y.','R.G.','S.U.','T.B.','W.I.','Y.H.','Z.A.'];
+var SEC=['I10 Hipertensi esensial','E78.5 Hiperlipidemia','—','—','E11.9 DM tipe 2'];
+
+function score(c){
+  var s=6+c.issues.reduce(function(a,k){return a+ISSUES[k].w},0)+(c.sugg&&!c.sugg.done?12:0)+c.jitter;
+  return Math.min(96,s);
+}
+function needsReview(c){return c.issues.length>0||!!(c.sugg&&!c.sugg.done)}
+function genClaims(){
+  var pool=DX.filter(function(d){return !d.rj}),out=[];
+  for(var i=0;i<64;i++){
+    var dx=(i%11===5)?DX[11]:pick(pool);
+    var u=dx.u,doc=pick(DPJP[u]);
+    var g=pick(['Tn.','Ny.']),age=ri(28,79);
+    if(u==='Obstetri'){g='Ny.';age=ri(21,39)}else if(u==='Anak'){g='An.';age=ri(1,12)}else if(u==='Perinatologi'){g='By. Ny.';age=0}
+    var rj=!!dx.rj,sev=rj?0:(rnd()<.5?0:(rnd()<.7?1:2));
+    var elig=['lab','resume','bill','sep','kode'];
+    if(['Paru','Saraf','Jantung','Bedah'].indexOf(u)>=0)elig.push('rad');
+    if(['Bedah','Obstetri'].indexOf(u)>=0)elig.push('oplap');
+    if(!rj)elig.push('los');
+    var r=rnd(),n=r<.34?0:r<.68?1:r<.9?2:3,issues=[];
+    while(issues.length<n){var k=pick(elig);if(issues.indexOf(k)<0)issues.push(k)}
+    var sugg=(!rj&&dx.s&&sev<2&&rnd()<.5)?{c:dx.s.c,n:dx.s.n,why:dx.s.why,done:false,accepted:false}:null;
+    var day=ri(1,14);
+    var c={i:i,sep:'0901R001'+'1026V'+String(10230+i*37+ri(0,30)).padStart(6,'0'),pasien:g+' '+pick(INITIALS),age:age,rm:'0'+ri(1,9)+'-'+ri(10,99)+'-'+ri(1000,9999),
+      jenis:rj?'Rawat Jalan':'Rawat Inap',los:rj?0:ri(2,9),day:day,pulang:day+' Okt 2026',unit:u,doc:doc,dx:dx,sev:sev,tarif:dx.t[sev],issues:issues,sugg:sugg,sec:rj?'—':pick(SEC),jitter:ri(0,8),status:'',sent:{}};
+    c.score=score(c);
+    if(i<14)c.status='baru';else c.status=needsReview(c)?'review':'siap';
+    if(c.status==='siap'&&i%4===0)c.status='disetujui';
+    out.push(c);
+  }
+  out.slice(0,14).forEach(function(c,k){c.day=14-Math.floor(k/5);c.pulang=c.day+' Okt 2026'});
+  return out;
+}
+var claims=genClaims();
+function byId(i){return claims[i]}
+
+var MONTHS=['Nov','Des','Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt'];
+var YEARS=['2025','2025','2026','2026','2026','2026','2026','2026','2026','2026','2026','2026'];
+var SERIES={
+  pending:{v:[12.9,13.2,12.6,13.4,12.8,12.5,12.1,11.4,10.6,9.8,9.0,8.2],max:15,step:5,unit:'%',title:'Tingkat pending',value:'8,2%',delta:'↓ 0,8 poin',note:'Garis putus-putus menandai awal simulasi MAXY AI. Tren data dummy tidak membuktikan dampak produk.'},
+  days:{v:[7.6,7.9,7.4,8.1,7.7,7.5,7.3,6.4,5.8,5.3,4.9,4.1],max:10,step:2,unit:' hari',title:'Rata-rata hari dari pasien pulang ke pengajuan',value:'4,1 hari',delta:'↓ 0,8 hari',note:'Target ≤5 hari dari pasien pulang ke pengajuan.'}
+};
+var STATUS_COMP=[{l:'Layak',v:10200,p:82,c:'var(--s-layak)'},{l:'Pending',v:1000,p:8,c:'var(--s-pending)'},{l:'Dispute',v:700,p:6,c:'var(--s-dispute)'},{l:'Tidak layak',v:500,p:4,c:'var(--s-tolak)'}];
+var LIVE_IDX=7;
+var state={tab:'ringkasan',recovered:186,queueLimit:12,metric:'pending',insMode:'Cashless'};
+
+var ST={baru:['Belum diperiksa','mute'],review:['Perlu perbaikan','warn'],siap:['Siap diajukan','info'],disetujui:['Disetujui koder','ok']};
+function lvl(s){if(s>=65)return {label:'Tinggi',cls:'high',color:'var(--crit)'};if(s>=35)return {label:'Sedang',cls:'mid',color:'var(--warn)'};return {label:'Rendah',cls:'low',color:'var(--ok)'}}
+function sevLabel(c){return c.dx.rj?'Rawat jalan':'Severity '+['I','II','III'][c.sev]}
+
+var tt;
+function toast(msg){var t=$('#toast');t.textContent=msg;t.classList.add('on');clearTimeout(tt);tt=setTimeout(function(){t.classList.remove('on')},2600)}
+
+function closeNav(){document.body.classList.remove('nav-open');$('#sidebarBackdrop').hidden=true;$('#menuToggle').setAttribute('aria-expanded','false')}
+function openNav(){document.body.classList.add('nav-open');$('#sidebarBackdrop').hidden=false;$('#menuToggle').setAttribute('aria-expanded','true')}
+$('#menuToggle').addEventListener('click',openNav);
+$('#sidebarClose').addEventListener('click',closeNav);
+$('#sidebarBackdrop').addEventListener('click',closeNav);
+function showTab(t){
+  if(['ringkasan','kmkb','antrian','pending','analitik','jaminan','asuransi'].indexOf(t)<0)t='ringkasan';
+  state.tab=t;
+  $$('.tab').forEach(function(b){var active=b.getAttribute('data-tab')===t;b.setAttribute('aria-selected',active?'true':'false');if(active)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});
+  ['ringkasan','kmkb','antrian','pending','analitik','jaminan','asuransi'].forEach(function(k){var el=$('#tab-'+k);if(el)el.hidden=k!==t});
+  try{history.replaceState(null,'','#'+t)}catch(e){}
+  if(t==='ringkasan')drawTrend();
+  closeNav();window.scrollTo({top:0,behavior:'auto'});
+}
+$$('.tab').forEach(function(b){b.addEventListener('click',function(){showTab(b.getAttribute('data-tab'))})});
+
+
+/* Active BPJS inpatients: simulated KMKB workspace */
+var activeCases=[
+ {id:'RI-026-041',patient:'Tn. A.S.',dx:DX[0],admit:'12 Okt',los:3,bill:5.7,estimate:6.1,risk:'tinggi',issues:['lab','resume'],owner:'DPJP dan koder',source:'Trombosit 38.000/µL pada hasil lab hari ke-2; resume belum ditandatangani.',next:'Minta DPJP melengkapi resume dan koder menilai diagnosis sekunder yang didukung bukti.'},
+ {id:'RI-026-042',patient:'Ny. D.P.',dx:DX[1],admit:'10 Okt',los:5,bill:8.2,estimate:7.4,risk:'tinggi',issues:['rad','los'],owner:'DPJP dan KMKB',source:'Foto toraks dan catatan antibiotik perlu dicocokkan; billing melewati estimasi.',next:'Tinjau bukti pneumonia, lama rawat, dan biaya berjalan bersama KMKB.'},
+ {id:'RI-026-043',patient:'Tn. F.H.',dx:DX[2],admit:'11 Okt',los:4,bill:9.5,estimate:9.0,risk:'tinggi',issues:['los'],owner:'DPJP',source:'Catatan perkembangan belum menjelaskan kebutuhan rawat lebih lama.',next:'Lengkapi alasan klinis lama rawat dan pantau biaya harian.'},
+ {id:'RI-026-044',patient:'Ny. M.R.',dx:DX[3],admit:'09 Okt',los:6,bill:13.1,estimate:11.6,risk:'tinggi',issues:['rad','resume'],owner:'DPJP dan verifikator',source:'CT scan kepala belum dilampirkan pada berkas klaim sementara.',next:'Hubungkan hasil CT scan ke rekam medis dan tinjau diagnosis dengan verifikator.'},
+ {id:'RI-026-045',patient:'Tn. B.W.',dx:DX[4],admit:'13 Okt',los:2,bill:4.1,estimate:5.2,risk:'sedang',issues:['kode'],owner:'Koder',source:'Laporan tindakan debridemen dan catatan ulkus perlu dicocokkan dengan kode.',next:'Koder menilai kecocokan kode dengan laporan tindakan.'},
+ {id:'RI-026-046',patient:'Ny. L.S.',dx:DX[5],admit:'11 Okt',los:4,bill:7.9,estimate:8.7,risk:'sedang',issues:['lab'],owner:'DPJP',source:'Hasil ureum, kreatinin, dan eGFR belum terhubung ke berkas sementara.',next:'Tautkan penunjang dan catatan hemodialisis.'},
+ {id:'RI-026-047',patient:'Ny. E.K.',dx:DX[6],admit:'14 Okt',los:1,bill:6.4,estimate:8.4,risk:'sedang',issues:['oplap'],owner:'Dokter operator',source:'Indikasi sesar pada laporan operasi perlu diperjelas.',next:'Lengkapi laporan operasi dan indikasi tindakan.'},
+ {id:'RI-026-048',patient:'Tn. H.N.',dx:DX[7],admit:'12 Okt',los:3,bill:6.9,estimate:8.2,risk:'sedang',issues:['oplap'],owner:'Dokter operator',source:'Laporan operasi belum muncul pada lampiran yang tersinkron.',next:'Periksa laporan operasi dan hasil penunjang.'},
+ {id:'RI-026-049',patient:'An. R.G.',dx:DX[8],admit:'13 Okt',los:2,bill:2.8,estimate:3.4,risk:'rendah',issues:[],owner:'Tim KMKB',source:'Catatan cairan dan elektrolit tersedia untuk ditinjau.',next:'Lanjutkan pemantauan sampai pasien pulang.'},
+ {id:'RI-026-050',patient:'By. Ny. S.U.',dx:DX[9],admit:'08 Okt',los:7,bill:12.2,estimate:13.2,risk:'rendah',issues:[],owner:'Tim KMKB',source:'Catatan perawatan inkubator telah tersinkron.',next:'Pantau biaya dan kelengkapan berkas perinatologi.'}
+];
+activeCases.forEach(function(c,i){c.i=i;c.reviewed=false});
+function renderKmKb(){
+ var q=$('#kSearch').value.trim().toLowerCase(),r=$('#kRisk').value,u=$('#kUnit').value;
+ var rows=activeCases.filter(function(c){return (!r||c.risk===r)&&(!u||c.dx.u===u)&&(!q||[c.patient,c.id,c.dx.n,c.dx.c,c.dx.u,c.owner].join(' ').toLowerCase().indexOf(q)>=0)});
+ $('#kCount').textContent=rows.length+' dari '+activeCases.length+' pasien';
+ var high=activeCases.filter(function(c){return c.risk==='tinggi'&&!c.reviewed}).length;
+ var missing=activeCases.filter(function(c){return c.issues.length>0}).length;
+ var over=activeCases.filter(function(c){return c.bill>c.estimate}).length;
+ $('#kKpis').innerHTML=[
+  {l:'Pasien aktif',v:activeCases.length,d:'Dalam pemantauan KMKB'},
+  {l:'Prioritas tinggi',v:high,d:'Belum dicatat telaahnya'},
+  {l:'Temuan dokumen/kode',v:missing,d:'Pasien aktif yang perlu ditinjau'},
+  {l:'Billing di atas estimasi',v:over,d:'Perlu tinjauan biaya dan klinis'}
+ ].map(function(x){return '<div class="kpi"><span class="lbl">'+x.l+'</span><span class="val num">'+x.v+'</span><span class="dl">'+x.d+'</span></div>'}).join('');
+ var ct=$('#cntKmkb');if(ct)ct.textContent=high;
+ $('#kBody').innerHTML=rows.length?rows.map(function(c){
+  var cls=c.risk==='tinggi'?'crit':c.risk==='sedang'?'warn':'ok',ratio=Math.min(100,Math.round(c.bill/c.estimate*100));
+  return '<tr data-kopen="'+c.i+'" tabindex="0" aria-label="Buka kasus '+esc(c.id)+'">'+
+   '<td><span class="sep">'+c.id+' · masuk '+c.admit+'</span><b class="who">'+esc(c.patient)+'</b><span class="row-sub">'+c.dx.c+' '+esc(c.dx.n)+'</span></td>'+
+   '<td><b>'+esc(c.dx.u)+'</b><span class="row-sub">'+esc(c.owner)+'</span></td>'+
+   '<td><b>'+c.los+' hari</b><span class="row-sub">Sejak masuk</span></td>'+
+   '<td><span class="pill '+cls+'">'+(c.reviewed?'Telaah dicatat':c.risk==='tinggi'?'Prioritas tinggi':c.issues.length?'Perlu telaah':'Terpantau')+'</span><span class="row-sub">'+c.issues.length+' temuan · buka bukti</span></td>'+
+   '<td style="text-align:right"><b class="num">'+rp(c.bill)+' / '+rp(c.estimate)+'</b><div class="mini-progress"><i class="'+(ratio>=100?'hot':'')+'" style="width:'+ratio+'%"></i></div></td></tr>';
+ }).join(''):'<tr><td colspan="5" class="empty">Tidak ada pasien yang sesuai filter.</td></tr>';
+}
+(function(){var units=activeCases.map(function(c){return c.dx.u}).filter(function(v,i,a){return a.indexOf(v)===i}).sort();$('#kUnit').innerHTML='<option value="">Semua unit</option>'+units.map(function(u){return '<option>'+esc(u)+'</option>'}).join('')})();
+['kSearch','kRisk','kUnit'].forEach(function(id){$('#'+id).addEventListener(id==='kSearch'?'input':'change',renderKmKb)});
+$('#kBody').addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){var row=e.target.closest('[data-kopen]');if(row){e.preventDefault();openKmKb(Number(row.getAttribute('data-kopen')))}}});
+function openKmKb(i){currentClaim=null;currentPending=null;currentInsurance=null;currentKmKb=activeCases[i];showDrawer()}
+function renderKmKbDrawer(c){
+ var cls=c.risk==='tinggi'?'crit':c.risk==='sedang'?'warn':'ok',h=[];
+ h.push(drawerHead('KMKB · pasien masih dirawat',esc(c.id),'<span class="pill '+cls+'">'+(c.reviewed?'Telaah dicatat':c.risk==='tinggi'?'Prioritas tinggi':'Perlu telaah')+'</span>',''));
+ h.push('<div class="db db-claim">');
+ h.push('<section class="sec summary-card"><div class="sec-h"><h4>Episode rawat</h4></div><div class="meta-grid">'+
+  '<div class="meta-item"><span>Pasien</span><b>'+esc(c.patient)+'</b></div><div class="meta-item"><span>Masuk · lama rawat</span><b>'+c.admit+' · '+c.los+' hari</b></div>'+
+  '<div class="meta-item"><span>Diagnosis</span><b>'+c.dx.c+' '+esc(c.dx.n)+'</b></div><div class="meta-item"><span>Unit</span><b>'+esc(c.dx.u)+'</b></div></div></section>');
+ h.push('<section class="sec stage-card"><div class="sec-h"><h4>Biaya berjalan vs estimasi tarif</h4><span class="tag">Simulasi</span></div><div class="i-reconc">'+
+  '<div><span>Billing berjalan</span><b>'+rp(c.bill)+'</b></div><div><span>Estimasi tarif</span><b>'+rp(c.estimate)+'</b></div>'+
+  '<div><span>Selisih</span><b>'+rp(Math.abs(c.estimate-c.bill))+'</b></div><div><span>Lama rawat</span><b>'+c.los+' hari</b></div></div>'+
+  '<p class="note">Estimasi adalah alat pantau KMKB, bukan persetujuan BPJS atau target mengubah diagnosis.</p></section>');
+ h.push('<section class="sec stage-card"><div class="sec-h"><h4>Temuan dan sumber</h4></div><div class="finding-list">'+
+  (c.issues.length?c.issues.map(function(k){return '<div class="finding"><b>'+esc(ISSUES[k].t)+'</b><small>'+esc(ISSUES[k].cat)+' · perlu ditinjau '+esc(c.owner)+'</small></div>'}).join(''):'<div class="callout">Belum ada temuan dokumen atau kode. Pemantauan tetap berjalan.</div>')+
+  '</div><div class="callout"><b>Sumber rekam medis</b><span>'+esc(c.source)+'</span></div></section>');
+ h.push('<section class="sec stage-card"><div class="sec-h"><h4>Telaah koding dan verifikasi</h4></div>'+
+  '<div class="source-row"><div><b>Diagnosis saat ini · '+c.dx.c+'</b><small>'+esc(c.dx.n)+'</small></div><span class="pill info">Review koder</span></div>'+
+  (c.dx.s?'<div class="source-row"><div><b>Usulan yang perlu dikonfirmasi · '+c.dx.s.c+'</b><small>'+esc(c.dx.s.why)+'</small></div><span class="pill warn">Belum divalidasi</span></div>':'')+
+  '<div class="source-row"><div><b>Aturan dan bukti</b><small>Periksa checklist, catatan DPJP, penunjang, dan tindakan sebelum pengajuan.</small></div><span class="pill mute">Tinjau</span></div></section>');
+ h.push('<section class="sec stage-card"><div class="sec-h"><h4>Dokumen pendukung</h4></div><ul class="evidence">'+c.dx.ev.map(function(x){return '<li>'+esc(x)+'</li>'}).join('')+'</ul></section>');
+ h.push('<div class="i-next"><b>Langkah berikutnya · '+esc(c.owner)+'</b><p>'+esc(c.next)+'</p></div></div>');
+ h.push('<div class="df">'+(c.reviewed?'<span class="pill info">Telaah dicatat · bukti tetap harus dilengkapi</span>':'<button class="btn primary" id="kReview">Catat sudah ditinjau</button>')+'</div>');
+ $('#drawer').innerHTML=h.join('');$('#dClose').addEventListener('click',closeDrawer);
+ var b=$('#kReview');if(b)b.addEventListener('click',function(){c.reviewed=true;renderKmKb();renderPriorities();renderDrawer();toast('Telaah dicatat dalam demo; temuan belum otomatis selesai')});
+}
+/* summary */
+function renderKpis(){
+  var k=[
+    {l:'Nilai klaim · Okt',v:'Rp 12,4 M',d:'1.860 berkas diajukan',c:''},
+    {l:'Tingkat pending berkas',v:'8,2%',d:'Sep 9,0% · turun 0,8 poin',c:'good'},
+    {l:'Menunggu penyelesaian',v:'Rp 1,7 M',d:'214 berkas pending/dispute; belum pasti hilang',c:'warn'},
+    {l:'Pulang → pengajuan',v:'4,1 hari',d:'Sep: 4,9 hari',c:'good'},
+    {l:'Potensi kode · simulasi',v:rp(state.recovered),d:'Perlu validasi klinis dan koder',c:'',hl:true,id:'kRec'}
+  ];
+  $('#kpis').innerHTML=k.map(function(x){
+    return '<div class="kpi'+(x.hl?' hl':'')+'"'+(x.id?' id="'+x.id+'"':'')+'>'+
+      '<span class="lbl">'+x.l+'</span>'+
+      '<span class="val num">'+x.v+'</span>'+
+      '<span class="dl '+(x.c||'')+'">'+x.d+'</span>'+
+    '</div>';
+  }).join('');
+  var note=$('#recoveredNote');if(note)note.textContent=rp(state.recovered);
+}
+
+function renderStatusSummary(){
+  var stack=$('#summaryStack');
+  if(!stack)return;
+  stack.innerHTML=STATUS_COMP.map(function(x){
+    return '<div style="width:'+x.p+'%;background:'+x.c+'" title="'+x.l+': '+rp(x.v)+' ('+x.p+'%)"></div>';
+  }).join('');
+  $('#summaryStatus').innerHTML=STATUS_COMP.map(function(x){
+    return '<div class="status-item"><span class="sw" style="background:'+x.c+'"></span><div>'+
+      '<span class="st-label">'+x.l+'</span><span class="st-val num">'+rp(x.v)+' · '+x.p+'%</span>'+
+    '</div></div>';
+  }).join('');
+}
+
+function verifierChecks(c){
+  var checks=[
+    {label:'SEP & eligibilitas',full:'SEP dan eligibilitas peserta valid',ok:c.issues.indexOf('sep')<0},
+    {label:'Resume medis',full:'Resume medis lengkap dan ditandatangani DPJP',ok:c.issues.indexOf('resume')<0},
+    {label:'Bukti penunjang',full:'Bukti penunjang mendukung diagnosis',ok:c.issues.indexOf('lab')<0&&c.issues.indexOf('rad')<0}
+  ];
+  if(['Bedah','Obstetri'].indexOf(c.unit)>=0)checks.push({label:'Laporan operasi',full:'Laporan operasi terlampir',ok:c.issues.indexOf('oplap')<0});
+  checks.push({label:'Kode diagnosis',full:'Kode diagnosis sesuai dokumentasi',ok:c.issues.indexOf('kode')<0&&c.issues.indexOf('los')<0&&!(c.sugg&&!c.sugg.done)});
+  checks.push({label:'Rincian tagihan',full:'Rincian tagihan sesuai pelayanan',ok:c.issues.indexOf('bill')<0});
+  return checks;
+}
+
+function verifierChip(x){
+  return '<span class="vcheck '+(x.ok?'ok':'bad')+'" title="'+esc(x.full)+'">'+
+    '<span class="mk" aria-hidden="true">'+(x.ok?'✓':'!')+'</span><span>'+esc(x.label)+'</span>'+
+  '</span>';
+}
+
+function drawTrend(){
+  var metric=state.metric,S=SERIES[metric];
+  $('#trendTitle').textContent=S.title;
+  $('#trendValue').textContent=S.value;
+  $('#trendDelta').textContent=S.delta;
+  $('#trendNote').textContent=S.note;
+  var el=$('#trend');if(!el||el.offsetParent===null)return;
+  var v=S.v;
+  var W=Math.max(260,el.clientWidth),H=230;
+  var pl=34,pr=30,pt=29,pb=28;
+  function x(i){return pl+i*(W-pl-pr)/(v.length-1)}
+  function y(val){return pt+(H-pt-pb)*(1-val/S.max)}
+  var s='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" role="img" aria-label="'+S.title+', November 2025 sampai Oktober 2026">';
+  for(var t=0;t<=S.max;t+=S.step){
+    s+='<line class="grid" x1="'+pl+'" x2="'+(W-pr)+'" y1="'+y(t)+'" y2="'+y(t)+'"/>'+
+       '<text class="ax" x="'+(pl-8)+'" y="'+(y(t)+4)+'" text-anchor="end">'+t+'</text>';
+  }
+  var every=W<520?2:1;
+  v.forEach(function(_,i){if(i%every===0||i===v.length-1)s+='<text class="ax" x="'+x(i)+'" y="'+(H-8)+'" text-anchor="middle">'+MONTHS[i]+'</text>'});
+  var gx=(x(LIVE_IDX-1)+x(LIVE_IDX))/2;
+  s+='<line class="live" x1="'+gx+'" x2="'+gx+'" y1="'+(pt-16)+'" y2="'+(H-pb)+'"/>'+
+     '<text class="live-t" x="'+(gx+6)+'" y="'+(pt-5)+'">MAXY AI</text>';
+  var pts=v.map(function(val,i){return [x(i),y(val)]});
+  s+='<path class="ar" d="M'+pts[0][0]+','+y(0)+' L'+pts.map(function(p){return p.join(',')}).join(' L')+' L'+pts[pts.length-1][0]+','+y(0)+' Z"/>';
+  s+='<path class="ln" d="M'+pts.map(function(p){return p.join(',')}).join(' L')+'"/>';
+  pts.forEach(function(p,i){s+='<circle class="pt" cx="'+p[0]+'" cy="'+p[1]+'" r="'+(i===pts.length-1?5:3.5)+'"/>'});
+  var lp=pts[pts.length-1];
+  s+='<text class="end-t" x="'+lp[0]+'" y="'+(lp[1]-13)+'" text-anchor="middle">'+id1(v[v.length-1])+S.unit+'</text>';
+  s+='<line class="cross" id="cross" x1="0" x2="0" y1="'+pt+'" y2="'+(H-pb)+'" visibility="hidden"/>';
+  s+='<rect x="'+pl+'" y="0" width="'+(W-pl-pr)+'" height="'+H+'" fill="transparent" id="hit"/></svg>'+
+     '<div class="tt" id="ttip" hidden></div>';
+  el.innerHTML=s;
+  var hit=$('#hit',el),cross=$('#cross',el),tip=$('#ttip',el);
+  function at(ev){
+    var r=el.getBoundingClientRect(),px=ev.clientX-r.left;
+    var i=Math.round((px-pl)/((W-pl-pr)/(v.length-1)));
+    i=Math.max(0,Math.min(v.length-1,i));
+    cross.setAttribute('x1',x(i));cross.setAttribute('x2',x(i));cross.setAttribute('visibility','visible');
+    tip.hidden=false;
+    tip.style.left=Math.max(66,Math.min(W-66,x(i)))+'px';
+    tip.style.top=y(v[i])+'px';
+    tip.textContent=MONTHS[i]+' '+YEARS[i]+' · '+id1(v[i])+S.unit+(i>=LIVE_IDX?' · dengan MAXY AI':'');
+  }
+  hit.addEventListener('pointermove',at);
+  hit.addEventListener('pointerdown',at);
+  hit.addEventListener('pointerleave',function(){tip.hidden=true;cross.setAttribute('visibility','hidden')});
+}
+var rz;
+window.addEventListener('resize',function(){clearTimeout(rz);rz=setTimeout(drawTrend,120)});
+$$('[data-metric]').forEach(function(b){
+  b.addEventListener('click',function(){
+    state.metric=b.getAttribute('data-metric');
+    $$('[data-metric]').forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false')});
+    drawTrend();
+  });
+});
+
+function renderPriorities(){
+  var nb=claims.filter(function(c){return c.status==='baru'}).length;
+  var open=pending.filter(function(p){return p.col<3});
+  var late=open.filter(function(p){return p.age>7}).length;
+  var drafts=pending.filter(function(p){return p.col===2}).length;
+  var rows=[
+    {n:activeCases.filter(function(c){return c.risk==='tinggi'&&!c.reviewed}).length,t:'Pasien aktif berisiko tinggi',s:'Tinjau bukti klinis dan biaya saat masih dirawat',go:'kmkb'},
+     {n:nb,t:'Klaim baru belum diperiksa',s:'Jalankan verifier sebelum pengajuan',go:'antrian'},
+    {n:late,t:'Pending & dispute lewat 7 hari',s:'Perlu prioritas penyelesaian',go:'pending'},
+    {n:37,t:'Klaim mendekati kedaluwarsa',s:'Tindak lanjuti dalam 30 hari',go:'analitik'},
+    {n:drafts,t:'Draf jawaban menunggu tinjauan',s:'Koder perlu memeriksa sebelum kirim',go:'pending'},
+     {n:insurance.filter(function(c){return c.mode==='Cashless'&&c.priority==='tinggi'&&!c.followed}).length,t:'Cashless perlu tindakan',s:'Periksa manfaat, penjaminan, dan selisih',go:'asuransi'}
+  ];
+  $('#priorities').innerHTML=rows.map(function(r){
+    return '<button class="task" data-goto="'+r.go+'">'+
+      '<span class="task-count num">'+r.n+'</span>'+
+      '<span class="task-txt"><b>'+r.t+'</b><span>'+r.s+'</span></span>'+
+      '<span class="task-arrow" aria-hidden="true">→</span>'+
+    '</button>';
+  }).join('');
+}
+
+function renderFeed(){
+  var examined=claims.filter(function(c){return c.status!=='baru'}).length;
+  var high=claims.filter(function(c){return c.status!=='baru'&&c.score>=65}).length;
+  var sug=claims.filter(function(c){return c.status!=='baru'&&c.sugg&&!c.sugg.done});
+  var doc=claims.filter(function(c){return c.status!=='baru'&&c.issues.some(function(k){return ISSUES[k].cat!=='Koding'})});
+  var drafts=pending.filter(function(p){return p.col===2}).length;
+  var potential=sug.reduce(function(a,c){return a+(c.dx.t[c.sev+1]-c.tarif)},0);
+  var rows=[
+    {agent:'Verifier',title:examined+' klaim diperiksa · '+high+' berisiko tinggi',meta:'Pre-Submission Verifier',go:'antrian'},
+    {agent:'Coding',title:sug.length?sug.length+' saran kode menunggu tinjauan':'Tidak ada saran kode baru',meta:sug.length?'Potensi +'+rp(potential):'Kode sudah sesuai dokumentasi',claim:sug.length?sug[0].i:null,go:'antrian'},
+    {agent:'Dokumentasi',title:doc.length+' berkas memiliki dokumen kurang',meta:'Pengingat siap dikirim',claim:doc.length?doc[0].i:null,go:'antrian'},
+    {agent:'Pending',title:drafts+' draf jawaban siap ditinjau',meta:'Pending Resolution AI',go:'pending'}
+  ];
+  $('#feed').innerHTML=rows.map(function(x){
+    var attr=x.claim!=null?'data-open="'+x.claim+'"':'data-goto="'+x.go+'"';
+    return '<button class="feed-row" '+attr+'>'+
+      '<span class="agent-tag">'+x.agent+'</span>'+
+      '<span><span class="feed-title">'+x.title+'</span><span class="feed-meta">'+x.meta+'</span></span>'+
+      '<span class="feed-arrow" aria-hidden="true">→</span>'+
+    '</button>';
+  }).join('');
+}
+
+/* queue */
+function initUnits(){
+  var us=claims.map(function(c){return c.unit}).filter(function(v,i,a){return a.indexOf(v)===i}).sort();
+  $('#fUnit').innerHTML='<option value="">Semua unit</option>'+us.map(function(u){return '<option>'+esc(u)+'</option>'}).join('');
+}
+var scanning=null;
+function renderQueue(){
+  var q=$('#q').value.trim().toLowerCase(),fs=$('#fStatus').value,fu=$('#fUnit').value,so=$('#fSort').value;
+  var rows=claims.filter(function(c){
+    return (!fs||c.status===fs)&&(!fu||c.unit===fu)&&(!q||[c.sep,c.pasien,c.dx.c,c.dx.n,c.doc,c.unit].join(' ').toLowerCase().indexOf(q)>=0);
+  });
+  rows.sort(function(a,b){
+    if(so==='tarif')return b.tarif-a.tarif;
+    if(so==='pulang')return b.day-a.day;
+    var sa=a.status==='baru'?999:a.score,sb=b.status==='baru'?999:b.score;
+    return sb-sa;
+  });
+  var shown=rows.slice(0,state.queueLimit);
+  var body=$('#qBody');
+  if(!rows.length){
+    body.innerHTML='<tr><td colspan="4" class="empty">Tidak ada klaim yang cocok dengan filter ini.</td></tr>';
+  }else{
+    body.innerHTML=shown.map(function(c){
+      var st=ST[c.status],risk;
+      if(scanning===c.i){
+        risk='<span class="risk none"><span class="spin" aria-hidden="true"></span> Memeriksa…</span>';
+      }else if(c.status==='baru'){
+        risk='<span class="risk none">Belum diperiksa</span><span class="risk-sub">Menunggu AI Verifier</span>';
+      }else{
+        var L=lvl(c.score),n=c.issues.length+(c.sugg&&!c.sugg.done?1:0);
+        risk='<span class="risk '+L.cls+'"><i aria-hidden="true"></i>'+L.label+' · '+c.score+'</span>'+
+          '<span class="risk-sub">'+(n?n+' temuan':'Tidak ada temuan')+(c.sugg&&!c.sugg.done?' · saran kode':'')+'</span>';
+      }
+      return '<tr class="click'+(scanning===c.i?' scan':'')+'" data-open="'+c.i+'" tabindex="0">'+
+        '<td class="c-claim"><span class="sep">'+c.sep+'</span><b class="who">'+esc(c.pasien)+'</b>'+
+          '<span class="row-sub">Pulang '+c.pulang+' · '+c.jenis+'</span></td>'+
+        '<td class="c-status"><span class="pill '+st[1]+'">'+st[0]+'</span></td>'+
+        '<td class="c-risk">'+risk+'</td>'+
+        '<td class="c-value"><span class="num">'+rp(c.tarif)+'</span><span class="chev" aria-hidden="true">›</span></td>'+
+      '</tr>';
+    }).join('');
+  }
+  $('#queueCount').textContent='Menampilkan '+shown.length+' dari '+rows.length+' klaim';
+  $('#loadMore').hidden=shown.length>=rows.length;
+  if($('#loadMore').parentNode)$('#loadMore').parentNode.hidden=shown.length>=rows.length;
+  updateCounts();
+}
+
+['q','fStatus','fUnit','fSort'].forEach(function(id){
+  var el=$('#'+id);
+  el.addEventListener(id==='q'?'input':'change',function(){state.queueLimit=12;renderQueue()});
+});
+$('#loadMore').addEventListener('click',function(){state.queueLimit+=12;renderQueue()});
+$('#qBody').addEventListener('keydown',function(e){
+  if(e.key==='Enter'||e.key===' '){
+    var r=e.target.closest('[data-open]');
+    if(r){e.preventDefault();openClaim(Number(r.getAttribute('data-open')))}
+  }
+});
+
+function updateCounts(){
+  var nb=claims.filter(function(c){return c.status==='baru'}).length;
+  var nr=claims.filter(function(c){return c.status==='review'}).length;
+  $('#cntQueue').textContent=nb+nr;
+  $('#cntPending').textContent=pending.filter(function(p){return p.col<3}).length;
+  $('#cntInsurance').textContent=insurance.filter(function(c){return c.mode==='Cashless'&&c.priority==='tinggi'&&!c.followed}).length;
+  $('#queueSub').textContent=nb
+    ? nb+' klaim baru menunggu pemeriksaan · '+nr+' perlu perbaikan'
+    : 'Semua klaim sudah diperiksa · '+nr+' perlu perbaikan';
+  $('#runVerify').disabled=!nb;
+}
+
+$('#runVerify').addEventListener('click',function(){
+  var todo=claims.filter(function(c){return c.status==='baru'});
+  if(!todo.length)return;
+  $('#fStatus').value='';$('#fSort').value='pulang';state.queueLimit=12;
+  var pr=$('#prog'),bar=pr.firstElementChild;
+  pr.hidden=false;
+  $('#runVerify').disabled=true;
+  var k=0,stepMs=reduce?0:180;
+  function step(){
+    if(k>0){
+      var c=todo[k-1];
+      c.status=needsReview(c)?'review':'siap';
+    }
+    if(k>=todo.length){
+      scanning=null;
+      bar.style.width='100%';
+      renderQueue();renderFeed();renderPriorities();
+      var review=todo.filter(function(c){return c.status==='review'}).length;
+      toast(todo.length+' klaim diperiksa: '+review+' perlu ditinjau, '+(todo.length-review)+' siap untuk pemeriksaan koder');
+      $('#fSort').value='risk';
+      setTimeout(function(){pr.hidden=true;bar.style.width='0';renderQueue()},900);
+      return;
+    }
+    scanning=todo[k].i;
+    bar.style.width=(k/todo.length*100)+'%';
+    renderQueue();
+    k++;
+    setTimeout(step,stepMs);
+  }
+  step();
+});
+
+/* pending */
+var COLS=['Baru dikembalikan','Dirutekan','Draf jawaban siap','Diajukan ulang'];
+var PIC={'Penunjang medis':'DPJP','Dokumentasi':'DPJP','Koding':'Koder','Billing':'Tim billing'};
+var pending=(function(){
+  var spec=[['A91','Pending','Penunjang medis',0,4],['O82','Pending','Dokumentasi',0,2],['I63.9','Pending','Penunjang medis',0,9],['I50.9','Dispute','Koding',1,12],
+            ['K35.8','Pending','Dokumentasi',1,5],['J18.9','Pending','Penunjang medis',2,6],['N18.5','Pending','Penunjang medis',2,8],['E11.9','Dispute','Koding',0,14],
+            ['A09','Pending','Penunjang medis',3,10],['J44.1','Pending','Penunjang medis',3,11]];
+  return spec.map(function(s,i){
+    var dx=DX.filter(function(d){return d.c===s[0]})[0];
+    var sev=ri(0,2);
+    return {i:i,sep:'0901R001'+(i<6?'0926':'0826')+'V'+String(4120+i*53).padStart(6,'0'),
+      pasien:(dx.u==='Obstetri'?'Ny. ':dx.u==='Anak'?'An. ':pick(['Tn. ','Ny. ']))+pick(INITIALS),
+      dx:dx,nilai:dx.t[sev],type:s[1],cat:s[2],pic:PIC[s[2]],col:s[3],age:s[4],
+      note:s[1]==='Dispute'?(s[0]==='I50.9'?'Verifikator menilai lama rawat tidak sesuai kelompok; RS belum sepakat.':'Verifikator mengusulkan perubahan diagnosis utama; RS belum sepakat.'):dx.note};
+  });
+})();
+
+function draft(p){
+  var ev=p.dx.ev.length?p.dx.ev:['Resume medis bertanda tangan DPJP'];
+  return 'Yth. Verifikator BPJS Kesehatan\nKantor Cabang Jakarta Timur\n\nPerihal: Tanggapan atas '+(p.type==='Dispute'?'klaim dispute':'pengembalian klaim')+' SEP '+p.sep+'\n\n'+
+    'Menindaklanjuti catatan verifikasi atas klaim pasien '+p.pasien+' dengan diagnosis '+p.dx.c+' '+p.dx.n+', bersama ini kami sampaikan dokumen pendukung berikut:\n\n'+
+    ev.map(function(e,k){return (k+1)+'. '+e}).join('\n')+'\n\n'+
+    'Dokumen tersebut menunjukkan bahwa diagnosis dan tindakan yang diajukan didukung oleh bukti klinis selama perawatan. Kami mohon klaim ini dapat diverifikasi ulang.\n\n'+
+    'Hormat kami,\nTim Casemix '+RS;
+}
+
+function renderPending(){
+  var open=pending.filter(function(p){return p.col<3});
+  var pv=open.filter(function(p){return p.type==='Pending'}).reduce(function(a,b){return a+b.nilai},0);
+  var dv=open.filter(function(p){return p.type==='Dispute'}).reduce(function(a,b){return a+b.nilai},0);
+  var late=open.filter(function(p){return p.age>7}).length;
+  var avg=open.length?open.reduce(function(a,b){return a+b.age},0)/open.length:0;
+  $('#pendingSub').textContent=open.length+' berkas perlu tindak lanjut RS · '+(pending.length-open.length)+' sudah diajukan ulang, menunggu BPJS · rata-rata '+id1(avg)+' hari sejak dikembalikan';
+
+  $('#pKpis').innerHTML=[
+    {l:'Nilai pending',v:rp(pv),d:open.filter(function(p){return p.type==='Pending'}).length+' berkas'},
+    {l:'Nilai dispute',v:rp(dv),d:open.filter(function(p){return p.type==='Dispute'}).length+' berkas'},
+    {l:'Lewat 7 hari',v:late+' berkas',d:late?'Perlu prioritas':'Tidak ada keterlambatan',c:late?'warn':'good'}
+  ].map(function(x){
+    return '<div class="kpi"><span class="lbl">'+x.l+'</span><span class="val num">'+x.v+'</span><span class="dl '+(x.c||'')+'">'+x.d+'</span></div>';
+  }).join('');
+
+  $('#kanban').innerHTML=COLS.map(function(name,ci){
+    var items=pending.filter(function(p){return p.col===ci});
+    return '<div class="col"><div class="col-h"><span>'+name+'</span><span class="count">'+items.length+'</span></div>'+
+      (items.length?items.map(card).join(''):'<p class="col-empty">Kosong</p>')+'</div>';
+  }).join('');
+  updateCounts();
+}
+
+function card(p){
+  var typ=p.type==='Dispute'?'<span class="pill purple">Dispute</span>':'<span class="pill warn">Pending</span>';
+  var act='';
+  if(p.col===0)act='<button class="btn primary" data-pact="route" data-id="'+p.i+'">Rutekan ke '+p.pic+'</button>';
+  if(p.col===1)act='<button class="btn primary" data-pact="draft" data-id="'+p.i+'">Buat draf jawaban</button>';
+  if(p.col===2)act='<button class="btn primary" data-pact="submit" data-id="'+p.i+'">Ajukan ulang</button>';
+  if(p.col===3)act='<span class="pill info">Menunggu verifikasi</span>';
+  return '<div class="pcard'+(p.moved?' moved':'')+'" data-popen="'+p.i+'" tabindex="0" role="button" aria-label="Buka detail '+p.sep+'">'+
+    '<div class="ptop"><span class="mono">'+p.sep+'</span>'+typ+'</div>'+
+    '<div class="pwho"><b>'+esc(p.pasien)+'</b><span>'+p.dx.c+' '+esc(p.dx.n)+'</span></div>'+
+    '<div class="pmeta"><b class="num">'+rp(p.nilai)+'</b><span>'+p.age+' hari</span></div>'+
+    '<div class="pact">'+act+'</div>'+
+  '</div>';
+}
+
+$('#kanban').addEventListener('click',function(e){
+  var b=e.target.closest('[data-pact]');
+  if(b){e.stopPropagation();pAct(Number(b.getAttribute('data-id')),b.getAttribute('data-pact'));return}
+  var c=e.target.closest('[data-popen]');
+  if(c)openPending(Number(c.getAttribute('data-popen')));
+});
+$('#kanban').addEventListener('keydown',function(e){
+  if(e.key==='Enter'||e.key===' '){
+    var c=e.target.closest('[data-popen]');
+    if(c&&!e.target.closest('[data-pact]')){e.preventDefault();openPending(Number(c.getAttribute('data-popen')))}
+  }
+});
+
+function pAct(i,a){
+  var p=pending[i];
+  pending.forEach(function(x){x.moved=false});
+  if(a==='route'){p.col=1;p.moved=true;toast('Dirutekan ke '+p.pic+' dengan daftar dokumen yang dibutuhkan')}
+  if(a==='draft'){p.col=2;p.moved=true;toast('Draf jawaban disiapkan')}
+  if(a==='submit'){p.col=3;p.moved=true;toast('Diajukan ulang ke BPJS (simulasi)')}
+  if(a==='copy'){copyText(draft(p));return}
+  renderPending();
+  if(currentPending===p)renderDrawer();
+  else if(a==='draft')openPending(i);
+  renderFeed();renderPriorities();
+}
+
+/* Private insurance pathway. Portfolio totals above and these case examples are dummy data. */
+var I_STAGES={manfaat:'Cek polis',awal:'Jaminan awal',akhir:'Jaminan akhir',bayar:'Pembayaran',selesai:'Selesai'};
+var insurance=[
+ {id:'AS-26-1047',patient:'Tn. Ahmad Saputra',payer:'Allianz Indonesia',care:'Rawat inap · demam berdarah',date:'22 Okt 2026',member:'•••• 1047',ai:'Membandingkan data peserta dan rencana kamar dengan ringkasan manfaat yang diunggah; menandai bagian polis yang perlu dicek admisi.',mode:'Cashless',stage:'manfaat',bill:12.8,approved:null,paid:null,excess:null,priority:'tinggi',pic:'Admisi',issue:'Manfaat rawat inap dan kelas kamar perlu dikonfirmasi',evidence:'Data peserta dan ringkasan ketentuan polis belum dicocokkan dengan kelas perawatan.',next:'Cocokkan peserta, manfaat, batas kamar, dan masa tunggu sesuai polis sebelum pengajuan penjaminan awal.',docs:['Kartu peserta','Ringkasan polis','Rencana rawat']},
+ {id:'AS-26-2184',patient:'Ny. Bunga Wulandari',payer:'Prudential Indonesia',care:'Rawat inap · pneumonia',date:'22 Okt 2026',member:'•••• 2184',ai:'Mendeteksi belum adanya respons penjaminan awal dan mengingatkan admisi untuk menindaklanjuti permintaan.',mode:'Cashless',stage:'awal',bill:18.5,approved:null,paid:null,excess:null,priority:'tinggi',pic:'Admisi',issue:'Surat penjaminan awal belum diterima',evidence:'Permintaan penjaminan awal sudah dicatat; respons penjamin belum tersedia di berkas demo.',next:'Hubungi penjamin atau TPA dan catat nomor serta status surat penjaminan awal.',docs:['Kartu peserta','Resume awal','Permintaan penjaminan']},
+ {id:'AS-26-1061',patient:'Ny. Citra Rahmawati',payer:'Allianz Indonesia',care:'Rawat inap · infeksi saluran napas',date:'21 Okt 2026',member:'•••• 1061',ai:'Mencocokkan item obat pada tagihan dengan keputusan akhir penjamin, lalu menghitung selisih untuk ditinjau billing.',mode:'Cashless',stage:'akhir',bill:24.6,approved:20.2,paid:null,excess:4.4,priority:'tinggi',pic:'Tim billing',issue:'Batas manfaat obat khusus terlampaui Rp 4,4 jt',evidence:'Tagihan obat khusus Rp 6,4 jt; keputusan penjamin contoh menanggung Rp 2 jt dan mencatat Rp 4,4 jt sebagai bagian pasien.',next:'Cocokkan rincian obat dengan keputusan penjamin, lalu jelaskan bagian biaya pasien sebelum penagihan.',docs:['Tagihan final','Resep & pemakaian obat','Surat penjaminan akhir']},
+ {id:'AS-26-4091',patient:'Tn. Dimas Prakoso',payer:'AXA Mandiri',care:'Rawat inap · batu empedu',date:'21 Okt 2026',member:'•••• 4091',ai:'Memeriksa daftar lampiran dan menandai resume medis final yang belum tersedia.',mode:'Cashless',stage:'akhir',bill:9.8,approved:null,paid:null,excess:null,priority:'tinggi',pic:'DPJP',issue:'Resume medis final belum terlampir',evidence:'Berkas pulang tersedia, tetapi resume bertanda tangan belum terdeteksi pada lampiran demo.',next:'Minta DPJP meninjau dan melengkapi resume sebelum penjaminan akhir.',docs:['Resume medis final','Hasil penunjang','Tagihan final']},
+ {id:'AS-26-2258',patient:'Ny. Eka Kartika',payer:'Prudential Indonesia',care:'Rawat inap · apendisitis',date:'20 Okt 2026',member:'•••• 2258',ai:'Mengingatkan piutang yang sudah disetujui tetapi belum memiliki pasangan transaksi pembayaran.',mode:'Cashless',stage:'bayar',bill:16.4,approved:14.6,paid:null,excess:1.8,priority:'tinggi',pic:'Keuangan RS',issue:'Klaim disetujui, pembayaran belum tercatat',evidence:'Nilai disetujui Rp 14,6 jt pada keputusan penjamin; mutasi pembayaran belum cocok.',next:'Cocokkan nomor klaim dan tanggal jatuh bayar dengan buku piutang dan mutasi bank.',docs:['Keputusan penjamin','Buku piutang','Mutasi bank']},
+ {id:'AS-26-4120',patient:'Tn. Farhan Hakim',payer:'AXA Mandiri',care:'Rawat inap · diabetes melitus',date:'20 Okt 2026',member:'•••• 4120',ai:'Mencocokkan keputusan penjamin dan kas masuk; menandai selisih Rp 2 jt untuk ditelusuri keuangan.',mode:'Cashless',stage:'bayar',bill:11.2,approved:10,paid:8,excess:1.2,priority:'tinggi',pic:'Keuangan RS',issue:'Pembayaran kurang Rp 2 jt dari nilai disetujui',evidence:'Keputusan penjamin Rp 10 jt; pembayaran yang dicatat Rp 8 jt.',next:'Telusuri potongan atau pembayaran bertahap sebelum menutup piutang.',docs:['Keputusan penjamin','Remittance advice','Mutasi bank']},
+ {id:'AS-26-1130',patient:'Ny. Gita Lestari',payer:'Allianz Indonesia',care:'Rawat inap · tifoid',date:'18 Okt 2026',member:'•••• 1130',ai:'Mencocokkan nilai yang disetujui dengan pembayaran RS dan menandai kasus siap diarsipkan.',mode:'Cashless',stage:'selesai',bill:7.6,approved:7.2,paid:7.2,excess:0.4,priority:'rutin',pic:'Keuangan RS',issue:'Pembayaran penjamin sudah cocok',evidence:'Penjamin menyetujui dan membayar Rp 7,2 jt; Rp 0,4 jt pada contoh merupakan bagian pasien dan status pelunasannya belum dicatat.',next:'Arsipkan berkas dan bukti rekonsiliasi.',docs:['Tagihan final','Keputusan penjamin','Bukti pembayaran']},
+ {id:'RB-26-2281',patient:'Tn. Hendra Nugraha',payer:'Prudential Indonesia',care:'Rawat jalan · pemeriksaan ortopedi',date:'22 Okt 2026',member:'•••• 2281',ai:'Mencocokkan kuitansi lunas Rp 3,8 jt, rincian biaya, dan resume medis; berkas contoh sudah sesuai.',mode:'Reimbursement',stage:'siap',bill:3.8,approved:null,paid:null,excess:null,priority:'rutin',pic:'Petugas rekam medis',issue:'Berkas siap diberikan kepada pasien',evidence:'Kuitansi lunas Rp 3,8 jt sesuai rincian biaya dan resume medis tersedia.',next:'Berikan kuitansi, rincian biaya, dan resume medis kepada pasien untuk diajukan sendiri ke Prudential Indonesia.',docs:['Kuitansi lunas','Rincian biaya','Resume medis']}
+];
+
+insurance.push(
+ {id:'AS-26-3314',patient:'Ny. Intan Maharani',payer:'Manulife Indonesia',care:'Rawat inap · gastroenteritis',date:'23 Okt 2026',member:'•••• 3314',ai:'Membandingkan kelas kamar yang dipilih dengan ringkasan manfaat contoh; admisi mengonfirmasi selisih ke penjamin.',mode:'Cashless',stage:'manfaat',bill:13.4,approved:null,paid:null,excess:null,priority:'tinggi',pic:'Admisi',issue:'Kelas kamar melebihi manfaat pada ringkasan polis',evidence:'Kelas yang dipesan belum sesuai dengan batas kamar pada data manfaat contoh.',next:'Konfirmasi pilihan kamar dan kemungkinan selisih pasien sebelum rawat.',docs:['Kartu peserta','Ringkasan manfaat','Formulir admisi']},
+ {id:'AS-26-3395',patient:'Tn. Joko Taufik',payer:'Allianz Indonesia',care:'Rawat inap · tindakan artroskopi',date:'23 Okt 2026',member:'•••• 3395',ai:'Menandai tindakan terjadwal dengan estimasi biaya tinggi dan belum adanya keputusan penjaminan awal.',mode:'Cashless',stage:'awal',bill:20.1,approved:null,paid:null,excess:null,priority:'tinggi',pic:'Tim penjaminan',issue:'Tindakan berbiaya tinggi menunggu persetujuan awal',evidence:'Rencana tindakan tercatat; respons penjamin untuk tindakan tersebut belum ada.',next:'Lampirkan indikasi klinis dan minta keputusan penjamin sebelum tindakan terjadwal.',docs:['Rencana tindakan','Indikasi klinis','Permintaan persetujuan']},
+ {id:'AS-26-4430',patient:'Ny. Kartika Anindya',payer:'AXA Mandiri',care:'Rawat inap · infeksi saluran kemih',date:'19 Okt 2026',member:'•••• 4430',ai:'Memantau perubahan diagnosis dan tindakan terhadap berkas awal; memberi peringatan bila dokumen perlu diperbarui.',mode:'Cashless',stage:'awal',bill:6.4,approved:null,paid:null,excess:null,priority:'rutin',pic:'Admisi',issue:'Penjaminan awal sudah tercatat',evidence:'Nomor surat penjaminan awal tersedia pada berkas demo.',next:'Pantau perubahan layanan sampai penjaminan akhir.',docs:['Surat penjaminan awal','Kartu peserta','Resume awal']},
+ {id:'RB-26-5488',patient:'Tn. Lukman Setiawan',payer:'Prudential Indonesia',care:'Rawat jalan · konsultasi kardiologi',date:'23 Okt 2026',member:'•••• 5488',ai:'Membandingkan kuitansi lunas Rp 4,6 jt dengan rincian biaya Rp 4,4 jt dan menandai selisih Rp 200 rb untuk tim billing.',mode:'Reimbursement',stage:'akhir',bill:4.6,approved:null,paid:null,excess:null,priority:'tinggi',pic:'Tim billing',issue:'Kuitansi dan rincian biaya berbeda Rp 200 rb',evidence:'Kuitansi lunas Rp 4,6 jt; jumlah item pada rincian biaya Rp 4,4 jt. Selisih Rp 200 rb pada data contoh perlu ditelusuri.',next:'Cocokkan transaksi dan terbitkan dokumen koreksi yang sesuai sebelum berkas diberikan kepada pasien.',docs:['Kuitansi lunas','Rincian biaya','Resume medis']}
+);
+var insuranceSignal={"AS-26-1047":"Cek manfaat kamar","AS-26-2184":"Jaminan awal belum masuk","AS-26-1061":"Selisih obat Rp 4,4 jt","AS-26-4091":"Resume akhir belum ada","AS-26-2258":"Disetujui, belum dibayar","AS-26-4120":"Kurang bayar Rp 2 jt","AS-26-1130":"Pembayaran penjamin cocok","RB-26-2281":"Berkas lengkap · siap diberikan","AS-26-3314":"Kelas kamar di atas manfaat","AS-26-3395":"Tindakan menunggu persetujuan","AS-26-4430":"Jaminan awal tercatat","RB-26-5488":"Selisih kuitansi Rp 200 rb"};
+insurance.forEach(function(c,i){c.i=i;c.followed=false;c.signal=insuranceSignal[c.id]||c.issue});
+
+insurance[2].line={service:'Obat khusus',billed:6.4,reference:2.0,difference:4.4,source:'Tagihan final · baris obat 14; ringkasan manfaat polis'};
+function renderJaminan(){
+ var rows=insurance.filter(function(c){return c.mode==='Cashless'&&(c.stage==='manfaat'||c.stage==='awal'||c.stage==='akhir')});
+ var urgent=rows.filter(function(c){return c.priority==='tinggi'&&!c.followed}).length;
+ var early=rows.filter(function(c){return c.stage==='manfaat'||c.stage==='awal'}).length;
+ var docs=rows.filter(function(c){return /resume|kuitansi|berkas|dokumen/i.test(c.issue)}).length;
+ $('#gCount').textContent=rows.length+' kasus contoh';
+ $('#gKpis').innerHTML=[
+  {l:'Sebelum jaminan akhir',v:early,d:'Kasus cashless'},
+  {l:'Perlu tindakan',v:urgent,d:'Belum ditindaklanjuti'},
+  {l:'Berkas belum lengkap',v:docs,d:'Periksa lampiran'},
+ ].map(function(x){return '<div class="kpi"><span class="lbl">'+x.l+'</span><span class="val num">'+x.v+'</span><span class="dl">'+x.d+'</span></div>'}).join('');
+ $('#gCards').innerHTML=rows.map(function(c){
+  var cls=c.followed?'info':c.priority==='tinggi'?'warn':'ok';
+  return '<button class="guarantee-card" data-iopen="'+c.i+'"><span class="sep">'+esc(c.id)+' · '+I_STAGES[c.stage]+'</span>'+
+   '<strong>'+esc(c.patient)+'</strong><small>'+esc(c.payer)+' · '+esc(c.date)+'</small>'+
+   '<p><span class="ai-badge">AI</span>'+esc(c.signal)+'</p><small>PIC: '+esc(c.pic)+'</small></button>';
+ }).join('');
+}
+
+
+function amountOrDash(n){return n==null?'Belum ada':rp(n)}
+function stageName(c){if(c.mode==='Reimbursement')return {akhir:'Perlu koreksi berkas',siap:'Siap diberikan',selesai:'Berkas diserahkan'}[c.stage]||'Berkas pasien';return I_STAGES[c.stage]}
+function setInsMode(mode){
+ state.insMode=mode;
+ $('#iSearch').value='';$('#iStage').value='';$('#iPriority').value='';
+ $('#cashlessIntro').hidden=mode!=='Cashless';$('#reimbIntro').hidden=mode!=='Reimbursement';
+ $('#insPageDesc').textContent=mode==='Cashless'?'Cashless: RS menagih asuransi dan mencocokkan pembayaran yang masuk.':'Reimbursement: periksa dan serahkan berkas yang dibutuhkan pasien.';
+ $('#iWorkTitle').textContent=mode==='Cashless'?'Kasus cashless':'Berkas untuk pasien';
+ $('#iCaseTh').textContent=mode==='Cashless'?'Klaim / pasien':'Berkas / pasien';
+ $('#iPayerTh').textContent=mode==='Cashless'?'Asuransi':'Asuransi tujuan';
+ $('#iAmountTh').textContent=mode==='Cashless'?'Biaya / tagihan':'Dibayar ke RS';
+ $('#cashlessRecon').hidden=mode!=='Cashless';
+ $('#iSearch').placeholder=mode==='Cashless'?'Cari klaim, pasien, asuransi':'Cari berkas, pasien, asuransi';
+ $('#iSearch').setAttribute('aria-label',mode==='Cashless'?'Cari klaim asuransi':'Cari berkas reimbursement');
+ $('#iStage').innerHTML=mode==='Cashless'
+  ?'<option value="">Semua tahap</option><option value="manfaat">Cek polis</option><option value="awal">Jaminan awal</option><option value="akhir">Jaminan akhir</option><option value="bayar">Pembayaran</option><option value="selesai">Selesai</option>'
+  :'<option value="">Semua tahap</option><option value="akhir">Perlu koreksi berkas</option><option value="siap">Siap diberikan</option><option value="selesai">Berkas diserahkan</option>';
+ $$('[data-i-mode]').forEach(function(b){var active=b.getAttribute('data-i-mode')===mode;b.setAttribute('aria-selected',active?'true':'false');b.tabIndex=active?0:-1});
+ $('#insuranceContent').setAttribute('aria-labelledby',mode==='Cashless'?'insCashlessTab':'insReimbTab');
+ renderInsurance();
+}
+$$('[data-i-mode]').forEach(function(b){b.addEventListener('click',function(){setInsMode(b.getAttribute('data-i-mode'))})});
+$('#insurancePaths').addEventListener('keydown',function(e){
+ if(['ArrowLeft','ArrowRight','Home','End'].indexOf(e.key)<0)return;
+ var tabs=$$('[data-i-mode]'),at=tabs.indexOf(document.activeElement);
+ if(at<0)return;
+ e.preventDefault();
+ var next=e.key==='Home'?0:e.key==='End'?tabs.length-1:e.key==='ArrowRight'?(at+1)%tabs.length:(at-1+tabs.length)%tabs.length;
+ setInsMode(tabs[next].getAttribute('data-i-mode'));
+ tabs[next].focus();
+});
+function renderInsurance(){
+ var mode=state.insMode,query=$('#iSearch').value.trim().toLowerCase(),stage=$('#iStage').value,pri=$('#iPriority').value;
+ var cohort=insurance.filter(function(c){return c.mode===mode});
+ var rows=cohort.filter(function(c){return (!stage||c.stage===stage)&&(!pri||c.priority===pri)&&(!query||[c.id,c.patient,c.payer,c.issue,c.signal].join(' ').toLowerCase().indexOf(query)>=0)});
+ rows.sort(function(a,b){return (a.priority==='tinggi'?0:1)-(b.priority==='tinggi'?0:1)||a.i-b.i});
+ $('#iCount').textContent=rows.length+' dari '+cohort.length+(mode==='Cashless'?' kasus contoh':' berkas contoh');
+ $('#cntInsurance').textContent=insurance.filter(function(c){return c.mode==='Cashless'&&c.priority==='tinggi'&&!c.followed}).length;
+ var active=cohort.filter(function(c){return c.priority==='tinggi'&&!c.followed}).length;
+ var excess=cohort.reduce(function(a,c){return a+(c.excess||0)},0);
+ var unpaid=cohort.reduce(function(a,c){return a+(c.approved||0)-(c.paid||0)},0);
+ var k=mode==='Cashless'
+ ?[{l:'Kasus',v:cohort.length,d:'Cashless'},{l:'Perlu tindakan',v:active,d:'Belum ditindaklanjuti'},{l:'Bagian pasien',v:rp(excess),d:'Sesuai keputusan contoh'},{l:'Belum dibayar RS',v:rp(unpaid),d:'Disetujui − dibayar'}]
+ :[{l:'Berkas pasien',v:cohort.length,d:'Bantuan RS'},{l:'Perlu koreksi',v:cohort.filter(function(c){return c.stage==='akhir'}).length,d:'Sebelum diberikan'},{l:'Siap diberikan',v:cohort.filter(function(c){return c.stage==='siap'}).length,d:'Dokumen sudah cocok'},{l:'Dibayar ke RS',v:rp(cohort.reduce(function(a,c){return a+c.bill},0)),d:'Lunas oleh pasien'}];
+ $('#iKpis').innerHTML=k.map(function(x){return '<div class="kpi"><span class="lbl">'+x.l+'</span><span class="val num">'+x.v+'</span><span class="dl">'+x.d+'</span></div>'}).join('');
+ $('#iBody').innerHTML=rows.length?rows.map(function(c){
+  var pill=c.stage==='selesai'?'ok':c.priority==='tinggi'&&!c.followed?'warn':'info';
+  return '<tr data-iopen="'+c.i+'" tabindex="0" aria-label="'+(mode==='Cashless'?'Buka klaim ':'Buka berkas ')+esc(c.id)+'">'+
+   '<td><span class="sep">'+esc(c.id)+'</span><b class="who">'+esc(c.patient)+'</b><span class="row-sub">'+esc(c.care)+' · '+esc(c.date)+'</span></td>'+
+   '<td><b>'+esc(c.payer)+'</b></td>'+
+   '<td><span class="pill '+pill+'">'+stageName(c)+'</span>'+(c.followed?'<span class="row-sub">'+(c.mode==='Reimbursement'&&c.stage==='selesai'?'Diserahkan ke pasien':'Tindak lanjut dicatat')+'</span>':'')+'</td>'+
+   '<td><span class="ai-badge">AI</span><span class="i-issue">'+esc(c.mode==='Reimbursement'&&c.stage==='selesai'?'Berkas sudah diserahkan':c.signal)+'</span><span class="i-pic">PIC: '+esc(c.pic)+'</span></td>'+
+   '<td class="i-amount num">'+rp(c.bill)+(mode==='Cashless'?'<span class="row-sub">'+((c.stage==='manfaat'||c.stage==='awal')?'Estimasi biaya':'Tagihan final')+'</span>':'')+'</td></tr>';
+ }).join(''):'<tr><td colspan="5" class="empty">Tidak ada kasus yang cocok. Ubah pencarian atau filter.</td></tr>';
+}
+['iSearch','iStage','iPriority'].forEach(function(id){var el=$('#'+id);el.addEventListener(id==='iSearch'?'input':'change',renderInsurance)});
+$('#iBody').addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){var row=e.target.closest('[data-iopen]');if(row){e.preventDefault();openInsurance(Number(row.getAttribute('data-iopen')))}}});
+function renderInsuranceDrawer(c){
+ var pill=c.stage==='selesai'?'ok':c.priority==='tinggi'&&!c.followed?'warn':'info';
+ var h=[drawerHead(c.mode==='Cashless'?'Klaim asuransi · Cashless':'Berkas RS · Reimbursement',esc(c.id),'<span class="pill '+pill+'">'+stageName(c)+'</span>','<span class="muted" style="font-size:12px">'+esc(c.payer)+'</span>')];
+ h.push('<div class="db db-claim">');
+ h.push('<section class="sec summary-card"><div class="sec-h"><h4>Kasus</h4></div><div class="meta-grid">'+
+  '<div class="meta-item"><span>Pasien</span><b>'+esc(c.patient)+'</b></div>'+
+  '<div class="meta-item"><span>Penjamin</span><b>'+esc(c.payer)+'</b></div>'+
+  
+  '<div class="meta-item"><span>Layanan</span><b>'+esc(c.care)+'</b></div>'+
+  '<div class="meta-item"><span>Anggota polis</span><b>'+esc(c.member)+'</b></div>'+
+  '<div class="meta-item"><span>Pembaruan terakhir</span><b>'+esc(c.date)+'</b></div>'+
+  '<div class="meta-item"><span>PIC berikutnya</span><b>'+esc(c.pic)+'</b></div></div></section>');
+ if(c.mode==='Cashless'){
+ h.push('<section class="sec stage-card"><div class="sec-h"><h4>Nilai per tahap</h4></div><div class="i-reconc">'+
+  '<div><span>'+((c.stage==='manfaat'||c.stage==='awal')?'Estimasi biaya':'Tagihan final')+'</span><b class="num">'+rp(c.bill)+'</b></div>'+
+  '<div><span>Disetujui penjamin</span><b class="num">'+amountOrDash(c.approved)+'</b></div>'+
+  '<div><span>Dibayar ke RS</span><b class="num">'+amountOrDash(c.paid)+'</b></div>'+
+  '<div><span>Bagian biaya pasien*</span><b class="num">'+amountOrDash(c.excess)+'</b></div></div>'+
+  '<p class="note">'+((c.stage==='manfaat'||c.stage==='awal')?'Biaya masih berupa estimasi; tagihan final dan keputusan penjamin belum tersedia.':'Bagian pasien mengikuti keputusan penjamin contoh dan belum tentu sudah dibayar.')+'</p></section>');
+ }else{
+ h.push('<section class="sec stage-card"><div class="sec-h"><h4>Pembayaran dan berkas RS</h4><span class="tag">Simulasi</span></div><div class="i-reconc">'+
+  '<div><span>Tagihan RS</span><b class="num">'+rp(c.bill)+'</b></div>'+
+  '<div><span>Dibayar pasien ke RS</span><b class="num">'+rp(c.bill)+'</b></div>'+
+  '<div><span>Status di RS</span><b>Lunas</b></div>'+
+  '<div><span>Asuransi tujuan</span><b>'+esc(c.payer)+'</b></div></div>'+
+  '<p class="note">RS tidak menagih asuransi untuk kasus ini. Pasien mengajukan sendiri; keputusan dan pembayaran kepada pasien tidak dicatat di dashboard RS.</p></section>');
+ }
+ h.push('<section class="sec stage-card"><div class="sec-h"><h4>'+(c.mode==='Reimbursement'?'Pemeriksaan berkas':'Temuan untuk ditinjau')+'</h4><span class="tag">Simulasi AI</span></div>'+
+  '<div class="callout"><b>'+esc(c.mode==='Reimbursement'&&c.stage==='selesai'?'Berkas diserahkan kepada pasien':c.issue)+'</b><span>'+esc(c.evidence)+'</span></div>'+
+  '<div class="i-next"><b>Yang dibantu AI</b><p>'+esc(c.ai)+'</p></div>'+
+  '<div class="i-next"><b>'+(c.mode==='Reimbursement'&&c.stage==='selesai'?'Status RS':'Langkah berikutnya · '+esc(c.pic))+'</b><p>'+esc(c.mode==='Reimbursement'&&c.stage==='selesai'?'Tugas dokumen RS selesai; pasien mengajukan penggantian kepada asuransi.':c.next)+'</p></div></section>');
+ h.push('<section class="sec stage-card"><div class="sec-h"><h4>Berkas yang perlu dicek</h4></div><ul class="evidence">'+c.docs.map(function(d){return '<li>'+esc(d)+'</li>'}).join('')+'</ul></section>');
+
+ if(c.line)h.push('<section class="sec stage-card"><div class="sec-h"><h4>Selisih item tagihan</h4></div>'+
+  '<div class="meta-grid"><div class="meta-item"><span>Item</span><b>'+esc(c.line.service)+'</b></div><div class="meta-item"><span>Ditagihkan</span><b>'+rp(c.line.billed)+'</b></div>'+
+  '<div class="meta-item"><span>Acuan manfaat</span><b>'+rp(c.line.reference)+'</b></div><div class="meta-item"><span>Selisih untuk ditinjau</span><b>'+rp(c.line.difference)+'</b></div></div>'+
+  '<p class="note">Sumber: '+esc(c.line.source)+'. Petugas memeriksa ketentuan polis dan respons penjamin sebelum menentukan bagian biaya pasien.</p></section>');
+ h.push('<details class="sec stage-card detail-disclosure"><summary>Riwayat telaah</summary><ol class="audit-list">'+
+  '<li>'+(c.mode==='Reimbursement'?'Data pembayaran RS dan dokumen contoh disiapkan.':'Data klaim dan dokumen contoh dimasukkan ke ruang kerja.')+'</li>'+
+  '<li>AI menandai: '+esc(c.issue)+'</li>'+
+  '<li>'+(c.mode==='Reimbursement'?(c.stage==='selesai'?'Berkas diserahkan kepada pasien.':c.followed?'Pemeriksaan dicatat; koreksi berkas masih diperlukan.':'Menunggu petugas memeriksa atau menyerahkan berkas.'):(c.followed?'Petugas mencatat tindak lanjut; hasil penjamin tetap menunggu konfirmasi.':'Menunggu petugas meninjau sumber dan mencatat tindak lanjut.'))+'</li>'+
+  '</ol></details>');
+ h.push('</div><div class="df">');
+ if(c.mode==='Reimbursement'){
+  if(c.stage==='siap')h.push('<button class="btn primary" id="iFollow">Tandai berkas diserahkan</button>');
+  else if(c.stage==='selesai')h.push('<span class="pill ok">Berkas diserahkan kepada pasien</span>');
+  else h.push(c.followed?'<span class="pill info">Pemeriksaan dicatat · berkas masih perlu koreksi</span>':'<button class="btn primary" id="iFollow">Catat pemeriksaan berkas</button>');
+ }else if(c.stage!=='selesai')h.push(c.followed?'<span class="pill info">Tindak lanjut dicatat · menunggu hasil penjamin</span>':'<button class="btn primary" id="iFollow">Catat tindak lanjut</button>');
+ else h.push('<span class="pill ok">Pembayaran cocok · kasus selesai</span>');
+ h.push('</div>');
+ $('#drawer').innerHTML=h.join('');
+ $('#dClose').addEventListener('click',closeDrawer);
+ var follow=$('#iFollow');if(follow)follow.addEventListener('click',function(){
+  if(c.mode==='Reimbursement'){
+   if(c.stage==='siap'){c.stage='selesai';c.followed=true;toast('Berkas diserahkan kepada pasien (simulasi)')}
+   else {c.followed=true;toast('Pemeriksaan dicatat; berkas masih perlu koreksi (simulasi)')}
+  }else{c.followed=true;toast('Tindak lanjut dicatat dalam demo; keputusan penjamin belum berubah')}
+  renderInsurance();renderJaminan();renderPriorities();renderDrawer()
+ });
+}
+
+/* drawer */
+var currentClaim=null,currentPending=null,currentInsurance=null,currentKmKb=null,lastFocus=null;
+
+function showDrawer(){
+  lastFocus=document.activeElement;
+  renderDrawer();
+  $('#drawer').classList.add('on');
+  if(document.body)document.body.classList.add('drawer-open');
+  $('#drawer').setAttribute('aria-hidden','false');
+  $('#scrim').classList.add('on');
+  setTimeout(function(){var x=$('#dClose');if(x)x.focus()},50);
+}
+function openClaim(i){currentClaim=byId(i);currentPending=null;currentInsurance=null;currentKmKb=null;showDrawer()}
+function openPending(i){currentClaim=null;currentPending=pending[i];currentInsurance=null;currentKmKb=null;showDrawer()}
+function openInsurance(i){currentClaim=null;currentPending=null;currentInsurance=insurance[i];currentKmKb=null;showDrawer()}
+function closeDrawer(){
+  var d=$('#drawer');
+  d.classList.remove('on');
+  if(document.body)document.body.classList.remove('drawer-open');
+  d.setAttribute('aria-hidden','true');
+  $('#scrim').classList.remove('on');
+  currentClaim=null;currentPending=null;currentInsurance=null;currentKmKb=null;
+  if(lastFocus&&lastFocus.focus)lastFocus.focus();
+}
+$('#scrim').addEventListener('click',closeDrawer);
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'&&$('#drawer').classList.contains('on')){closeDrawer();return}
+  if(e.key==='Tab'&&$('#drawer').classList.contains('on')){
+    var nodes=$$('button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])',$('#drawer')).filter(function(x){return !x.disabled&&x.getClientRects().length});
+    if(!nodes.length)return;
+    var first=nodes[0],last=nodes[nodes.length-1];
+    if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}
+    else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}
+  }
+});
+
+function drawerHead(eyebrow,title,pill,sub){
+  return '<div class="dh"><div><div class="eyebrow">'+esc(eyebrow)+'</div><h3 id="dTitle">'+title+'</h3>'+
+    '<div class="dh-sub">'+(pill||'')+(sub||'')+'</div></div>'+
+    '<button class="x" id="dClose" aria-label="Tutup">×</button></div>';
+}
+
+function renderDrawer(){
+  if(currentClaim)renderClaimDrawer(currentClaim);
+  else if(currentPending)renderPendingDrawer(currentPending);
+  else if(currentInsurance)renderInsuranceDrawer(currentInsurance);
+  else if(currentKmKb)renderKmKbDrawer(currentKmKb);
+}
+
+function renderClaimDrawer(c){
+  var st=ST[c.status],L=lvl(c.score),h=[];
+  h.push(drawerHead('Detail klaim','<span class="mono" style="font-size:14px">'+c.sep+'</span>','<span class="pill '+st[1]+'">'+st[0]+'</span>',''));
+  h.push('<div class="db db-claim">');
+
+  h.push('<section class="sec summary-card"><div class="sec-h"><h4>Ringkasan klaim</h4></div><div class="meta-grid">'+
+    '<div class="meta-item"><span>Pasien</span><b>'+esc(c.pasien)+(c.age?' · '+c.age+' th':'')+'</b></div>'+
+    '<div class="meta-item"><span>No. RM</span><b class="mono">'+c.rm+'</b></div>'+
+    '<div class="meta-item"><span>Pelayanan</span><div>'+c.jenis+(c.los?' · '+c.los+' hari':'')+' · pulang '+c.pulang+'</div></div>'+
+    '<div class="meta-item"><span>Unit · DPJP</span><div>'+c.unit+' · '+esc(c.doc)+'</div></div>'+
+    '<div class="meta-item"><span>Diagnosis utama</span><div><span class="mono">'+c.dx.c+'</span> '+esc(c.dx.n)+'</div></div>'+
+    '<div class="meta-item"><span>Estimasi tarif paket</span><div>'+sevLabel(c)+' · <b class="num">'+rp(c.tarif)+'</b></div></div>'+
+  '</div></section>');
+
+  var rec=c.status==='baru'?'Pratinjau awal · verifier belum dijalankan':needsReview(c)?'Tahan pengajuan sampai seluruh temuan ditinjau':'Siap diajukan setelah pemeriksaan koder';
+  var checks=verifierChecks(c);
+  h.push('<section class="sec stage-card"><div class="sec-h"><h4>Pre-Submission Verifier</h4><span class="tag">Tahap 04</span></div>'+
+    '<div class="score-box"><span class="big num" style="color:'+L.color+'">'+c.score+'</span>'+
+    '<div><span class="pill '+L.cls.replace('high','crit').replace('mid','warn').replace('low','ok')+'">Risiko '+L.label.toLowerCase()+'</span>'+
+    '<div class="lbl">'+rec+'</div></div></div>'+
+    '<div class="vcheck-grid">'+checks.map(verifierChip).join('')+'</div>'+
+  '</section>');
+
+  var docIssues=c.issues.filter(function(k){return ISSUES[k].cat!=='Koding'});
+  h.push('<section class="sec stage-card"><div class="sec-h"><h4>Dokumentasi</h4><span class="tag">Tahap 02</span></div>');
+  if(!docIssues.length){
+    h.push('<div class="callout">Berkas lengkap. Tidak ada dokumen yang kurang.</div>');
+  }else{
+    h.push(docIssues.map(function(k){
+      var who=ISSUES[k].cat==='Billing'?'tim billing':ISSUES[k].cat==='Administrasi'?'admisi':c.doc;
+      var act=c.sent[k]?'<span class="pill ok">Pengingat terkirim</span>':'<button class="btn small" data-act="remind" data-k="'+k+'">Kirim pengingat</button>';
+      return '<div class="doc-row"><span class="doc-txt">'+ISSUES[k].t+'<span>'+ISSUES[k].cat+' · ditujukan ke '+esc(who)+'</span></span>'+act+'</div>';
+    }).join(''));
+  }
+  h.push('</section>');
+
+  h.push('<section class="sec stage-card"><div class="sec-h"><h4>Coding AI agent</h4><span class="tag">Tahap 03</span></div><div class="code-box">'+
+    '<div class="code-line"><span>Kode saat ini</span><span><span class="mono">'+c.dx.c+'</span> '+esc(c.dx.n)+'</span></div>'+
+    (c.sec&&c.sec!=='—'?'<div class="code-line"><span>Diagnosis sekunder</span><span>'+esc(c.sec)+'</span></div>':''));
+  if(c.sugg&&!c.sugg.done){
+    var nt=c.dx.t[c.sev+1];
+    h.push('<div class="code-line suggest"><span>+ Saran AI</span><span><span class="mono">'+c.sugg.c+'</span> '+esc(c.sugg.n)+'</span></div></div>'+
+      '<p class="code-why"><b>Dasar saran:</b> '+esc(c.sugg.why)+'</p>'+
+      '<div class="code-line"><span>Estimasi tarif paket</span><span class="num">'+rp(c.tarif)+' → <b>'+rp(nt)+'</b> <span class="delta">(+'+rp(nt-c.tarif)+')</span></span></div>'+
+      '<div class="code-line"><span>Kelompok</span><span>'+sevLabel(c)+' → Severity '+['I','II','III'][c.sev+1]+'</span></div>'+
+      '<div class="drawer-actions"><button class="btn primary" data-act="accept">Terima saran</button><button class="btn" data-act="dismiss">Abaikan</button></div>'+
+      '<p class="note">Perlu konfirmasi koder &amp; DPJP. Nilai ini ilustratif, bukan pendapatan yang sudah disetujui atau dibayar.</p>');
+  }else if(c.sugg&&c.sugg.accepted){
+    h.push('<div class="code-line"><span>Diagnosis sekunder baru</span><span><span class="mono">'+c.sugg.c+'</span> '+esc(c.sugg.n)+'</span></div></div>'+
+      '<p class="note">Saran diterima untuk simulasi. Perubahan kode dan nilai klaim tetap harus diverifikasi; belum menjadi pembayaran.</p>'+
+      '<div class="code-line"><span>Estimasi tarif paket</span><span class="num">'+rp(c.tarif)+'</span></div>'+
+      '<div class="code-line" style="margin-top:10px"><span>Kelompok</span><span>'+sevLabel(c)+'</span></div>');
+  }else{
+    h.push('</div><p class="note">'+(c.sugg&&c.sugg.done?'Saran diabaikan koder.':'Kode sesuai dokumentasi. Tidak ada saran perubahan.')+
+      (c.issues.indexOf('kode')>=0?' Diagnosis utama perlu dilengkapi anamnesis yang mendukung.':'')+
+      (c.issues.indexOf('los')>=0?' Lama rawat perlu justifikasi di catatan perkembangan.':'')+'</p>'+
+      '<div class="code-line" style="margin-top:10px"><span>Kelompok</span><span>'+sevLabel(c)+'</span></div>');
+  }
+  h.push('</section>');
+
+
+
+  h.push('</div>');
+  h.push('<div class="df">');
+  if(c.status==='baru')h.push('<button class="btn primary" data-act="verify1">Periksa klaim ini</button>');
+  if(c.status==='review')h.push('<button class="btn primary" data-act="fix">Tandai temuan sudah diperbaiki</button>');
+  if(c.status==='siap')h.push('<button class="btn primary" data-act="approve">Setujui dan tandai siap kirim</button>');
+  if(c.status==='disetujui')h.push('<span class="pill ok">Disetujui koder · masuk batch berikutnya</span>');
+  h.push('</div>');
+
+  $('#drawer').innerHTML=h.join('');
+  bindDrawer();
+}
+
+function renderPendingDrawer(p){
+  var typ=p.type==='Dispute'?'<span class="pill purple">Dispute</span>':'<span class="pill warn">Pending</span>';
+  var h=[];
+  h.push(drawerHead('Detail pending', '<span class="mono" style="font-size:14px">'+p.sep+'</span>', typ, '<span class="muted" style="font-size:12px">'+COLS[p.col]+'</span>'));
+  h.push('<div class="db">');
+  h.push('<section class="sec"><div class="sec-h"><h4>Ringkasan</h4></div><div class="meta-grid">'+
+    '<div class="meta-item"><span>Pasien</span><b>'+esc(p.pasien)+'</b></div>'+
+    '<div class="meta-item"><span>Diagnosis</span><div><span class="mono">'+p.dx.c+'</span> '+esc(p.dx.n)+'</div></div>'+
+    '<div class="meta-item"><span>Nilai klaim</span><b class="num">'+rp(p.nilai)+'</b></div>'+
+    '<div class="meta-item"><span>Umur pending</span><b>'+p.age+' hari</b></div>'+
+    '<div class="meta-item"><span>Kategori</span><b>'+p.cat+'</b></div>'+
+    '<div class="meta-item"><span>PIC</span><b>'+(p.col>0?p.pic:'Belum ditentukan')+'</b></div>'+
+  '</div></section>');
+  h.push('<section class="sec"><div class="sec-h"><h4>Alur penyelesaian</h4></div><ol class="steps">'+
+    COLS.map(function(n,i){return '<li class="'+(i<=p.col?'on':'')+'">'+(i+1)+'. '+n+'</li>'}).join('')+'</ol></section>');
+  h.push('<section class="sec"><div class="sec-h"><h4>Catatan verifikator</h4></div><div class="callout">'+esc(p.note)+'</div></section>');
+  h.push('<section class="sec"><div class="sec-h"><h4>Bukti yang perlu dilampirkan</h4></div><ul class="evidence">'+
+    (p.dx.ev.length?p.dx.ev:['Resume medis bertanda tangan DPJP']).map(function(e){return '<li>'+esc(e)+'</li>'}).join('')+
+  '</ul></section>');
+  if(p.col>=2){
+    h.push('<section class="sec"><div class="sec-h"><h4>Draf jawaban</h4><button class="btn small" id="copyDraft">Salin draf</button></div>'+
+      '<div class="letter" id="letter">'+esc(draft(p))+'</div>'+
+      '<p class="note">Draf disusun dari catatan verifikator dan dokumen di rekam medis. Koder meninjau dan melampirkan bukti sebelum diajukan.</p></section>');
+  }
+  h.push('</div>');
+  h.push('<div class="df">');
+  if(p.col===0)h.push('<button class="btn primary" data-act="p-route">Rutekan ke '+p.pic+'</button>');
+  if(p.col===1)h.push('<button class="btn primary" data-act="p-draft">Buat draf jawaban</button>');
+  if(p.col===2)h.push('<button class="btn primary" data-act="p-submit">Ajukan ulang</button>');
+  if(p.col===3)h.push('<span class="pill info">Menunggu verifikasi ulang</span>');
+  h.push('</div>');
+  $('#drawer').innerHTML=h.join('');
+  bindDrawer();
+}
+
+function bindDrawer(){
+  var close=$('#dClose');
+  if(close)close.addEventListener('click',closeDrawer);
+  var copy=$('#copyDraft');
+  if(copy)copy.addEventListener('click',function(){copyText(draft(currentPending))});
+  $$('[data-act]',$('#drawer')).forEach(function(b){
+    b.addEventListener('click',function(){
+      var a=b.getAttribute('data-act'),c=currentClaim,p=currentPending,flashRec=false;
+      if(a==='verify1'&&c){
+        c.status=needsReview(c)?'review':'siap';
+        toast('Klaim diperiksa: skor risiko '+c.score);
+      }
+      if(a==='remind'&&c){
+        c.sent[b.getAttribute('data-k')]=true;
+        toast('Pengingat terkirim (simulasi)');
+      }
+      if(a==='accept'&&c){
+        var nt=c.dx.t[c.sev+1],d=nt-c.tarif;
+        c.sev++;c.tarif=nt;c.sugg.done=true;c.sugg.accepted=true;c.score=score(c);
+        if(c.status==='review'&&!needsReview(c))c.status='siap';
+        state.recovered=Math.round((state.recovered+d)*10)/10;
+        flashRec=true;
+        toast('Saran kode diterima untuk tinjauan · potensi tarif '+rp(d));
+      }
+      if(a==='dismiss'&&c){
+        c.sugg.done=true;c.score=score(c);
+        if(c.status==='review'&&!needsReview(c))c.status='siap';
+        toast('Saran diabaikan');
+      }
+      if(a==='fix'&&c){
+        c.issues=[];c.score=score(c);c.status=needsReview(c)?'review':'siap';
+        toast(c.status==='siap'?'Temuan selesai · siap diajukan':'Berkas diperbaiki · saran kode masih perlu ditinjau');
+      }
+      if(a==='approve'&&c){c.status='disetujui';toast('Klaim disetujui koder')}
+      if(a==='p-route'&&p){pAct(p.i,'route');return}
+      if(a==='p-draft'&&p){pAct(p.i,'draft');return}
+      if(a==='p-submit'&&p){pAct(p.i,'submit');return}
+      renderDrawer();renderQueue();renderFeed();renderPriorities();renderKpis();
+      if(flashRec){var kr=$('#kRec');if(kr){kr.classList.remove('flash');void kr.offsetWidth;kr.classList.add('flash')}}
+    });
+  });
+}
+
+function copyText(txt){
+  function fallback(){
+    var el=$('#letter');
+    if(el){
+      var r=document.createRange();r.selectNodeContents(el);
+      var s=getSelection();s.removeAllRanges();s.addRange(r);
+      toast('Teks dipilih · salin dengan Ctrl/Cmd+C');
+    }else toast('Draf siap disalin');
+  }
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(function(){toast('Draf disalin')},fallback);
+  }else fallback();
+}
+
+/* analytics */
+function renderAnalytics(){
+  var reasons=[['Kodefikasi diagnosis & tindakan',41],['Kelengkapan penunjang medis',33],['Rincian tagihan',18],['Administrasi SEP',8]];
+  $('#reasonsBody').innerHTML=reasons.map(function(r){
+    return '<div class="bar-row"><div class="top"><b>'+r[0]+'</b><span>'+r[1]+'%</span></div>'+
+      '<div class="bar-track"><i style="width:'+(r[1]/41*100)+'%"></i></div></div>';
+  }).join('');
+
+  $('#stack').innerHTML=STATUS_COMP.map(function(x){return '<div style="width:'+x.p+'%;background:'+x.c+'" title="'+x.l+': '+rp(x.v)+' ('+x.p+'%)"></div>'}).join('');
+  $('#stackLegend').innerHTML=STATUS_COMP.map(function(x){
+    return '<div class="legend-row"><span class="k"><span class="sw" style="background:'+x.c+'"></span>'+x.l+'</span><span class="v num">'+rp(x.v)+' · '+x.p+'%</span></div>';
+  }).join('');
+
+  var d=[['dr. Maya Lestari, Sp.N',98,13.3,'Penunjang medis'],['dr. Dewi Anggraini, Sp.PD',188,11.7,'Koding'],['dr. Budi Santoso, Sp.B',127,10.2,'Dokumentasi'],['dr. Fajar Nugroho, Sp.P',141,9.2,'Penunjang medis'],
+    ['dr. Hendra Gunawan, Sp.JP',176,7.4,'Koding (lama rawat)'],['dr. Andi Pratama, Sp.PD',212,6.1,'Penunjang medis'],['dr. Rina Kusuma, Sp.OG',164,5.5,'Dokumentasi'],['dr. Sari Wulandari, Sp.A',153,4.6,'Administrasi']];
+  $('#dpjpBody').innerHTML=d.map(function(r){
+    var hot=r[2]>=10;
+    return '<tr><td><b>'+r[0]+'</b><span class="row-sub">'+r[3]+'</span></td>'+
+      '<td style="text-align:right" class="num">'+r[1]+'</td>'+
+      '<td style="text-align:right"><span class="rate'+(hot?' hot':'')+'">'+id1(r[2])+'%</span></td></tr>';
+  }).join('');
+
+  var m=[['Gagal jantung','I50.9',9.0,10.4],['Infark serebral','I63.9',11.6,12.9],['Pneumonia','J18.9',7.4,7.9],['Persalinan sesar','O82',8.4,7.6],['Demam berdarah dengue','A91',6.1,5.2],['Apendisitis akut','K35.8',8.2,7.1]];
+  var mx=14;
+  $('#margin').innerHTML=m.map(function(r){
+    var df=r[2]-r[3],neg=df<0;
+    return '<div class="margin-row"><div class="margin-top"><span><b>'+r[0]+'</b> <span class="mono muted">'+r[1]+'</span></span>'+
+      '<em class="'+(neg?'neg':'pos')+'">'+(neg?'Defisit ':'Surplus ')+rp(Math.abs(df))+'</em></div>'+
+      '<div class="margin-bars">'+
+        '<div class="mbar"><span>Tarif</span><span class="track"><i style="width:'+(r[2]/mx*100)+'%;background:var(--s-layak)"></i></span><span class="amt num">'+id1(r[2])+'</span></div>'+
+        '<div class="mbar"><span>Biaya</span><span class="track"><i style="width:'+(r[3]/mx*100)+'%;background:var(--s-pending)"></i></span><span class="amt num">'+id1(r[3])+'</span></div>'+
+      '</div></div>';
+  }).join('');
+
+  var e=[['0901R0010526V002311','Tn. Haris Naufal','I50.9 Gagal jantung',9.0,'13 Mei 2026','Ekokardiografi belum terlampir',21,'13 Nov 2026'],
+    ['0901R0010526V002387','Ny. Laila Salsabila','O82 Persalinan sesar',8.4,'16 Mei 2026','Belum dikode',24,'16 Nov 2026'],
+    ['0901R0010526V002402','Tn. Bima Wardana','I63.9 Infark serebral',11.6,'18 Mei 2026','Hasil CT-scan belum terlampir',26,'18 Nov 2026'],
+    ['0901R0010526V002455','An. Rendi Gunawan','A09 Diare dan gastroenteritis',3.4,'20 Mei 2026','Resume belum ditandatangani',28,'20 Nov 2026'],
+    ['0901R0010526V002471','Ny. Diah Prameswari','N18.5 Penyakit ginjal kronik',8.7,'21 Mei 2026','Laporan hemodialisis belum ada',29,'21 Nov 2026']];
+  $('#expBody').innerHTML=e.map(function(r){
+    return '<tr><td><span class="sep">'+r[0]+'</span><b class="who">'+r[1]+'</b><span class="row-sub">'+r[2]+' · selesai '+r[4]+' · batas '+r[7]+'</span></td>'+
+      '<td class="num" style="white-space:nowrap"><b>'+rp(r[3])+'</b></td>'+
+      '<td>'+r[5]+'</td>'+
+      '<td style="text-align:right"><span class="pill '+(r[6]<=30?'crit':'warn')+'">'+r[6]+' hari</span></td></tr>';
+  }).join('');
+}
+
+/* global navigation */
+document.addEventListener('click',function(e){
+  var g=e.target.closest('[data-goto]');
+  if(g){showTab(g.getAttribute('data-goto'));return}
+  var o=e.target.closest('[data-open]');
+  if(o&&!e.target.closest('#drawer'))openClaim(Number(o.getAttribute('data-open')));
+  var io=e.target.closest('[data-iopen]');
+  if(io&&!e.target.closest('#drawer'))openInsurance(Number(io.getAttribute('data-iopen')));
+  var ko=e.target.closest('[data-kopen]');
+  if(ko&&!e.target.closest('#drawer'))openKmKb(Number(ko.getAttribute('data-kopen')));
+});
+
+/* Nama pasien fiktif untuk semua contoh BPJS. */
+var BPJS_MALE_NAMES={"A.S.":"Arman Suryanto","B.W.":"Bima Wardana","C.R.":"Cahya Rasyid","D.P.":"Deni Pratama","E.K.":"Eri Kurnia","F.H.":"Fajar Hidayat","G.L.":"Galih Lukman","H.N.":"Haris Naufal","I.M.":"Irfan Mahendra","J.T.":"Jefri Tanjung","K.A.":"Kevin Ardiansyah","L.S.":"Luthfi Syahputra","M.R.":"Maulana Ridwan","N.F.":"Nanda Firmansyah","O.D.":"Oskar Darmaji","P.Y.":"Panji Yudhistira","R.G.":"Rendi Gunawan","S.U.":"Satria Utomo","T.B.":"Teguh Baskoro","W.I.":"Wawan Iskandar","Y.H.":"Yudha Hartono","Z.A.":"Zulfikar Akbar"};
+var BPJS_FEMALE_NAMES={"A.S.":"Alya Sasmita","B.W.":"Bunga Wening","C.R.":"Celine Rahmadani","D.P.":"Diah Prameswari","E.K.":"Erna Kusumawati","F.H.":"Fina Hasibuan","G.L.":"Gendis Larasati","H.N.":"Hesti Nuraini","I.M.":"Indah Melati","J.T.":"Julia Tanjung","K.A.":"Kirana Anggraini","L.S.":"Laila Salsabila","M.R.":"Maya Ratnasari","N.F.":"Nisa Fauziah","O.D.":"Oktavia Dewi","P.Y.":"Prita Yuliani","R.G.":"Rani Ginting","S.U.":"Sari Utami","T.B.":"Tiara Berliana","W.I.":"Winda Irawati","Y.H.":"Yasmin Hanifa","Z.A.":"Zahra Amelia"};
+function expandBpjsPatient(label){
+ var m=/^(By\. Ny\.|Tn\.|Ny\.|An\.)\s+([A-Z]\.[A-Z]\.)$/.exec(label||'');
+ if(!m)return label;
+ var names=(m[1]==='Ny.'||m[1]==='By. Ny.')?BPJS_FEMALE_NAMES:BPJS_MALE_NAMES;
+ return m[1]+' '+(names[m[2]]||m[2]);
+}
+var bpjsUsed={};
+var bpjsExtra=['Wijaya','Permata','Adinata','Kusnadi','Pangestu','Prabowo','Suryani','Hartono'];
+function uniqueBpjsPatient(label){
+ var name=expandBpjsPatient(label),n=bpjsUsed[name]||0;bpjsUsed[name]=n+1;
+ return n?name+' '+bpjsExtra[(n-1)%bpjsExtra.length]:name;
+}
+claims.forEach(function(c){c.pasien=uniqueBpjsPatient(c.pasien)});
+activeCases.forEach(function(c){c.patient=uniqueBpjsPatient(c.patient)});
+pending.forEach(function(c){c.pasien=uniqueBpjsPatient(c.pasien)});
+
+/* boot */
+renderKpis();
+renderKmKb();
+renderStatusSummary();
+renderPriorities();
+renderFeed();
+initUnits();
+renderQueue();
+renderPending();
+setInsMode('Cashless');
+renderJaminan();
+renderAnalytics();
+var start='ringkasan';
+try{var hh=(location.hash||'').replace('#','');if(hh)start=hh}catch(e){}
+showTab(start);
+requestAnimationFrame(drawTrend);
+})();
+</script>
+</body>
+</html>
