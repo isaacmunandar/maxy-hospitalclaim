@@ -4,7 +4,9 @@
   "rewrites": [
     { "source": "/", "destination": "/landingPage.html" },
     { "source": "/index.html", "destination": "/landingPage.html" },
+    { "source": "/simrs-intelligence", "destination": "/Dashboard MAXY AI SIMRS Health Intelligence.html" },
     { "source": "/simrs-intelligence.html", "destination": "/Dashboard MAXY AI SIMRS Health Intelligence.html" },
+    { "source": "/claim-intelligence", "destination": "/Dashboard MAXY AI Claim Intelligence.html" },
     { "source": "/claim-intelligence.html", "destination": "/Dashboard MAXY AI Claim Intelligence.html" }
   ]
 }
