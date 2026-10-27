@@ -1011,6 +1011,37 @@ button.nav-cta {
   color: rgba(255, 255, 255, 0.25);
 }
 
+
+.modal-error-alert {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #FCA5A5;
+  padding: 9px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  line-height: 1.4;
+  margin-bottom: 14px;
+}
+.modal-error-alert svg {
+  flex-shrink: 0;
+  color: #EF4444;
+}
+.modal-input.is-invalid {
+  border-color: #EF4444 !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.22) !important;
+}
+@keyframes modalShake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
+}
+.shake-anim {
+  animation: modalShake 0.32s ease;
+}
+
 </style>
 </head>
 <body>
@@ -1247,16 +1278,21 @@ button.nav-cta {
     </div>
 
     <form class="platform-login-form" id="platformLoginForm">
+      <div class="modal-error-alert" id="modalErrorAlert" role="alert" style="display:none;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+        <span id="modalErrorText">Username atau kata sandi tidak valid.</span>
+      </div>
+
       <div class="modal-form-fields">
         <div class="modal-form-group">
-          <label class="modal-label" for="loginEmail">Email / NIP Akun</label>
-          <input class="modal-input" id="loginEmail" type="text" value="admin@maxy.asia" placeholder="nama@rs.co.id" autocomplete="username" required>
+          <label class="modal-label" for="loginEmail">Username / Akun</label>
+          <input class="modal-input" id="loginEmail" type="text" placeholder="demo" autocomplete="username" required>
         </div>
 
         <div class="modal-form-group">
           <label class="modal-label" for="loginPassword">Kata Sandi</label>
           <div class="modal-input-wrap">
-            <input class="modal-input" id="loginPassword" type="password" value="demo123456" placeholder="••••••••" autocomplete="current-password" required>
+            <input class="modal-input" id="loginPassword" type="password" placeholder="••••••••" autocomplete="current-password" required>
             <button class="toggle-pwd" id="togglePasswordBtn" type="button" aria-label="Tampilkan sandi">
               <svg class="eye-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
             </button>
@@ -1912,32 +1948,147 @@ button.nav-cta {
     });
   }
 
-  function doLogin() {
-    if (!btnSubmitPlatform) return;
-    btnSubmitPlatform.disabled = true;
-    btnSubmitPlatform.innerHTML = '<span class="btn-spinner"></span> ' + ((typeof currentLang !== 'undefined' && currentLang === 'en') ? 'Entering platform...' : 'Memasuki platform...');
-    
-    var emailVal = loginEmail ? loginEmail.value.trim() : 'admin@maxy.asia';
-    try {
-      sessionStorage.setItem('maxy_auth_user', JSON.stringify({
-        email: emailVal,
-        target: selectedTarget,
-        loginTime: new Date().toLocaleTimeString('id-ID')
-      }));
-    } catch(err) {}
+    var EXPECTED_HASH = 'afbe3e221d03eff975e42fab010466b61bc6cb7135a7780de6996ed8e010d1a4';
+  var SALT = 'maxy_simrs_salt_2026';
 
-    var dest = (selectedTarget === 'claim') ? 'claim-intelligence' : 'simrs-intelligence';
-    var path = window.location.pathname || '';
-    var targetUrl;
-    if (path.indexOf('/hospitalclaim') !== -1) {
-      targetUrl = '/hospitalclaim/' + dest;
-    } else {
-      targetUrl = './' + dest;
+  async function hashString(str) {
+    if (window.crypto && window.crypto.subtle) {
+      var buf = new TextEncoder().encode(str);
+      var hashBuf = await window.crypto.subtle.digest('SHA-256', buf);
+      var hashArr = Array.from(new Uint8Array(hashBuf));
+      return hashArr.map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
+    }
+    var h = 0;
+    for (var i = 0; i < str.length; i++) {
+      h = Math.imul(31, h) + str.charCodeAt(i) | 0;
+    }
+    return String(h);
+  }
+
+  function clearError() {
+    var errEl = document.getElementById('modalErrorAlert');
+    if (errEl) errEl.style.display = 'none';
+    if (loginEmail) loginEmail.classList.remove('is-invalid');
+    if (loginPassword) loginPassword.classList.remove('is-invalid');
+    var modalEl = document.querySelector('.platform-modal');
+    if (modalEl) modalEl.classList.remove('shake-anim');
+  }
+
+  function showError(msg) {
+    var errEl = document.getElementById('modalErrorAlert');
+    var errTxt = document.getElementById('modalErrorText');
+    if (errTxt) errTxt.textContent = msg;
+    if (errEl) errEl.style.display = 'flex';
+    if (loginPassword) loginPassword.classList.add('is-invalid');
+    var modalEl = document.querySelector('.platform-modal');
+    if (modalEl) {
+      modalEl.classList.remove('shake-anim');
+      void modalEl.offsetWidth;
+      modalEl.classList.add('shake-anim');
+    }
+  }
+
+  async   var EXPECTED_HASH = 'afbe3e221d03eff975e42fab010466b61bc6cb7135a7780de6996ed8e010d1a4';
+  var SALT = 'maxy_simrs_salt_2026';
+
+  async function hashString(str) {
+    if (window.crypto && window.crypto.subtle) {
+      var buf = new TextEncoder().encode(str);
+      var hashBuf = await window.crypto.subtle.digest('SHA-256', buf);
+      var hashArr = Array.from(new Uint8Array(hashBuf));
+      return hashArr.map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
+    }
+    var h = 0;
+    for (var i = 0; i < str.length; i++) {
+      h = Math.imul(31, h) + str.charCodeAt(i) | 0;
+    }
+    return String(h);
+  }
+
+  function clearError() {
+    var errEl = document.getElementById('modalErrorAlert');
+    if (errEl) errEl.style.display = 'none';
+    if (loginEmail) loginEmail.classList.remove('is-invalid');
+    if (loginPassword) loginPassword.classList.remove('is-invalid');
+    var modalEl = document.querySelector('.platform-modal');
+    if (modalEl) modalEl.classList.remove('shake-anim');
+  }
+
+  function showError(msg) {
+    var errEl = document.getElementById('modalErrorAlert');
+    var errTxt = document.getElementById('modalErrorText');
+    if (errTxt) errTxt.textContent = msg;
+    if (errEl) errEl.style.display = 'flex';
+    if (loginPassword) loginPassword.classList.add('is-invalid');
+    var modalEl = document.querySelector('.platform-modal');
+    if (modalEl) {
+      modalEl.classList.remove('shake-anim');
+      void modalEl.offsetWidth;
+      modalEl.classList.add('shake-anim');
+    }
+  }
+
+  async function doLogin() {
+    if (!btnSubmitPlatform) return;
+    clearError();
+
+    var userVal = loginEmail ? loginEmail.value.trim().toLowerCase() : '';
+    var passVal = loginPassword ? loginPassword.value.trim() : '';
+
+    if (!userVal || !passVal) {
+      showError((typeof currentLang !== 'undefined' && currentLang === 'en')
+        ? 'Please enter both username and password.'
+        : 'Silakan isi username dan kata sandi.');
+      if (!userVal && loginEmail) loginEmail.focus();
+      else if (loginPassword) loginPassword.focus();
+      return;
     }
 
-    setTimeout(function() {
-      window.location.href = targetUrl;
-    }, 150);
+    btnSubmitPlatform.disabled = true;
+    var origText = btnSubmitPlatform.innerHTML;
+    btnSubmitPlatform.innerHTML = '<span class="btn-spinner"></span> ' + ((typeof currentLang !== 'undefined' && currentLang === 'en') ? 'Verifying credentials...' : 'Memverifikasi kredensial...');
+
+    try {
+      var computed = await hashString(SALT + ':' + userVal + ':' + passVal);
+      if (computed !== EXPECTED_HASH) {
+        setTimeout(function() {
+          btnSubmitPlatform.disabled = false;
+          btnSubmitPlatform.innerHTML = origText;
+          showError((typeof currentLang !== 'undefined' && currentLang === 'en')
+            ? 'Invalid username or password. Please try again.'
+            : 'Username atau kata sandi salah. Silakan coba lagi.');
+          if (loginPassword) {
+            loginPassword.value = '';
+            loginPassword.focus();
+          }
+        }, 250);
+        return;
+      }
+
+      // Success
+      btnSubmitPlatform.innerHTML = '<span class="btn-spinner"></span> ' + ((typeof currentLang !== 'undefined' && currentLang === 'en') ? 'Access granted. Entering...' : 'Akses diterima. Memasuki...');
+      try {
+        sessionStorage.setItem('maxy_auth_user', userVal);
+        sessionStorage.setItem('maxy_auth_token', btoa(Date.now() + ':' + computed));
+      } catch(e) {}
+
+      var dest = (selectedTarget === 'claim') ? 'claim-intelligence' : 'simrs-intelligence';
+      var path = window.location.pathname || '';
+      var targetUrl;
+      if (path.indexOf('/hospitalclaim') !== -1) {
+        targetUrl = '/hospitalclaim/' + dest;
+      } else {
+        targetUrl = './' + dest;
+      }
+
+      setTimeout(function() {
+        window.location.href = targetUrl;
+      }, 250);
+    } catch(err) {
+      btnSubmitPlatform.disabled = false;
+      btnSubmitPlatform.innerHTML = origText;
+      showError('Terjadi kesalahan autentikasi. Silakan coba lagi.');
+    }
   }
 
   if (btnSubmitPlatform) {
@@ -1962,8 +2113,19 @@ button.nav-cta {
           doLogin();
         }
       });
+      inp.addEventListener('input', clearError);
     }
   });
+
+  // Auto-open modal if redirected with login=required
+  if (window.location.search.indexOf('login=required') !== -1) {
+    setTimeout(function() {
+      openPlatformModal();
+      showError((typeof currentLang !== 'undefined' && currentLang === 'en')
+        ? 'Login required to access the dashboard.'
+        : 'Silakan masuk terlebih dahulu untuk mengakses dashboard.');
+    }, 200);
+  }
 
   if (platformModalClose) {
     platformModalClose.addEventListener('click', closePlatformModal);
